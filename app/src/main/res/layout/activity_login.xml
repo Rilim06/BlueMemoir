@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="28dp">
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sign_in"
+            android:fontFamily="@font/baloo"
+            android:textColor="@color/font2"
+            android:textSize="40sp"
+            android:layout_gravity="center"/>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/email"
+            android:fontFamily="@font/baloo"
+            android:textColor="@color/font1" />
+
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=" "
+            android:inputType="textEmailAddress"
+            android:background="@drawable/rounded_login"
+            android:hint="@string/enter_email"
+            android:fontFamily="@font/baloo"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            android:textColorHint="@color/font3"
+            android:textColor="@color/font3"
+            android:textSize="16sp" />
+
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pass"
+            android:fontFamily="@font/baloo"
+            android:textColor="@color/font1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/rounded_login">
+
+            <EditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autofillHints=" "
+                android:inputType="textPassword"
+                android:background="@drawable/rounded_login"
+                android:hint="@string/enter_pass"
+                android:fontFamily="@font/baloo"
+                android:padding="12dp"
+                android:textColorHint="@color/font3"
+                android:textColor="@color/font3"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/togglePasswordVisibility"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/eye"
+                android:padding="12dp"
+                android:contentDescription="@string/show_pass" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"/>
+
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:background="@drawable/rounded_login_button"
+            android:fontFamily="@font/baloo"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:text="@string/loginButton" />
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/to_sign_up"
+                android:fontFamily="@font/baloo"
+                android:textColor="@color/font4" />
+
+            <TextView
+                android:id="@+id/to_sign_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:text="@string/sign_up"
+                android:fontFamily="@font/baloo"
+                android:textColor="@color/font5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/loginButton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/or"
+                android:textColor="@color/or"
+                android:fontFamily="@font/baloo"
+                android:textSize="16sp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/loginButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/google"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="16dp"
+                android:src="@drawable/google"
+                android:background="@drawable/circle_other_background"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:padding="15dp"
+                android:contentDescription="@string/google" />
+
+            <ImageButton
+                android:id="@+id/twitter"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="16dp"
+                android:src="@drawable/twitter"
+                android:background="@drawable/circle_other_background"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:padding="16dp"
+                android:contentDescription="@string/twitter"/>
+
+            <ImageButton
+                android:id="@+id/facebook"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="16dp"
+                android:src="@drawable/facebook"
+                android:background="@drawable/circle_other_background"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:padding="12dp"
+                android:contentDescription="@string/facebook"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
+
+
+
+
+
+
+
+
+
+
+

@@ -2,14 +2,14 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="oval">
-            <solid android:color="@color/nextButtonDarker" />
+            <solid android:color="@color/input2Darker" />
             <size android:width="56dp" android:height="56dp" />
         </shape>
     </item>
 
     <item>
         <shape android:shape="oval">
-            <solid android:color="@color/nextButton" />
+            <solid android:color="@color/input2" />
             <size android:width="56dp" android:height="56dp" />
         </shape>
     </item>

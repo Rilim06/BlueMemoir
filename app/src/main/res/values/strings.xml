@@ -1,9 +1,28 @@
 <resources>
     <string name="app_name">BlueMemoir</string>
+    <string name="default_web_client_id">546152925779-273vidbeo0gpj7pvus6rhs3drp58vm35.apps.googleusercontent.com</string>
     <string name="navbar">Bottom Navigation</string>
     <string name="home">Home</string>
     <string name="favorites">Favorites</string>
-    <string name="mapview">MapView</string>
+    <string name="mapview">Coming Soon!</string>
     <string name="profile">Profile</string>
-    <string name="nextButton"> </string>
+    <string name="nextButton">Next</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="email">Email Address</string>
+    <string name="enter_email">Enter Email Address</string>
+    <string name="pass">Password</string>
+    <string name="enter_pass">Enter Password</string>
+    <string name="re_pass">Confirm Password</string>
+    <string name="enter_re_pass">Re-enter Password</string>
+    <string name="show_pass"> </string>
+    <string name="loginButton">Continue</string>
+    <string name="rememberMe">Remember me</string>
+    <string name="or">Or</string>
+    <string name="google">Google</string>
+    <string name="twitter">Twitter</string>
+    <string name="facebook">Facebook</string>
+    <string name="to_sign_up">Don\'t have an account?</string>
+    <string name="to_sign_in">Already have an account?</string>
 </resources>
