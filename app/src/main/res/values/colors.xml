@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="cyan">#E4F6FA</color>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="lavender">#8692f7</color>
@@ -13,4 +8,16 @@
     <color name="colorPrimary">#8692f7</color>
     <color name="colorUnselected">#B3B3B3</color>
     <color name="nextButton">#FFF3A5</color>
+    <color name="nextButtonDarker">#DBC680</color>
+    <color name="input1">#F3F6FB</color>
+    <color name="input2">#F4F4F6</color>
+    <color name="input2Darker">#C3C9D1</color>
+    <color name="font1">#464A4C</color>
+    <color name="font2">#3D91C4</color>
+    <color name="font3">#68BFEC</color>
+    <color name="font4">#81809E</color>
+    <color name="font5">#33384B</color>
+    <color name="loginButton">#88CCF1</color>
+    <color name="loginButtonDarker">#5EA1C4</color>
+    <color name="or">#7D8A95</color>
 </resources>

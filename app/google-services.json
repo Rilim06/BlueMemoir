@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "546152925779",
+    "project_id": "bluememoir-27502",
+    "storage_bucket": "bluememoir-27502.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:546152925779:android:b1c5f6d75b64c1e7bb54a6",
+        "android_client_info": {
+          "package_name": "com.example.bluememoir"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDg3K9vANaZALfSyIFx3xQEoz7QRFHhoWk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
