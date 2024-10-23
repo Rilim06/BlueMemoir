@@ -21,6 +21,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.android.gms.common.api.ApiException
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
@@ -130,6 +131,21 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // Add account to database
+    private fun addProfile(userId: String, account: String, name: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        val profileData = hashMapOf(
+            "userId" to userId,
+            "account" to account,
+            "name" to name,
+            "isNotif" to true
+        )
+
+        db.collection("Profile")
+            .add(profileData)
+    }
+
     // Google
     private fun signInGoogle() {
         val signInIntent = googleSignInClient.signInIntent
@@ -143,6 +159,29 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     Log.d("Google SignIn", "signInWithCredential:success")
                     val user = auth.currentUser
+
+                    val userId = user?.uid
+                    val email = user?.email
+                    val name = user?.displayName
+
+                    val db = FirebaseFirestore.getInstance()
+                    var found = true
+
+                    db.collection("Profile").get().addOnSuccessListener { documents ->
+                        for (document in documents) {
+                            val existingAccount = document.getString("account")
+
+                            if(existingAccount == email){
+                                found = false
+                                break
+                            }
+                        }
+
+                        if(found){
+                            addProfile(userId!!, email!!, name!!)
+                        }
+                    }
+
                     Toast.makeText(this, "Signed in as: ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
