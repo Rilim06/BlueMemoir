@@ -38,7 +38,7 @@ class Welcome3 : Fragment() {
         // Change to AppCompatImageButton if your button is defined as such
         val continueButton: AppCompatImageButton = view.findViewById(R.id.continueButton)
         continueButton.setOnClickListener {
-            val intent = Intent(requireActivity(), MainActivity::class.java)
+            val intent = Intent(requireActivity(), LoginActivity::class.java)
             startActivity(intent)
             requireActivity().finish()
         }
