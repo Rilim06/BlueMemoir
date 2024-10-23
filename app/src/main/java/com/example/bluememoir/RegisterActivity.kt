@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -49,6 +50,11 @@ class RegisterActivity : AppCompatActivity() {
                                 val editor = preferences.edit()
                                 editor.putBoolean("registered", true)
                                 editor.apply()
+
+                                val userId = auth.currentUser?.uid
+                                val name = "User"
+
+                                addProfile(userId!!, email, name)
 
                                 val intent = Intent(this, LoginActivity::class.java)
                                 startActivity(intent)
@@ -108,5 +114,19 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun addProfile(userId: String, account: String, name: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        val profileData = hashMapOf(
+            "userId" to userId,
+            "account" to account,
+            "name" to name,
+            "isNotif" to true
+        )
+
+        db.collection("Profile")
+            .add(profileData)
     }
 }

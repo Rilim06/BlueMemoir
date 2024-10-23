@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
+import androidx.navigation.fragment.findNavController
 
 class Home : Fragment() {
 
@@ -29,8 +30,10 @@ class Home : Fragment() {
         val userEmail = currentUser?.email
         val userId = currentUser?.uid
 
-        val emailTextView = view.findViewById<TextView>(R.id.homeTextView)
-        emailTextView.text = userEmail
+        val addButton = view.findViewById<Button>(R.id.addButton)
+        addButton.setOnClickListener {
+            (activity as MainActivity).replaceFragment(AddDiary())
+        }
 
         return view
     }
