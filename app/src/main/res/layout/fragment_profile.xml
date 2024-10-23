@@ -1,21 +1,156 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Profile">
+    android:background="#F5F6FB">
 
-    <Button
-        android:id="@+id/logoutButton"
+    <!-- Header Decorative Shapes -->
+    <ImageView
+        android:id="@+id/header_shape"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_out"
-        android:layout_gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:src="@drawable/home05"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="fitXY" />
 
+    <!-- Profile Card Container with Frame -->
+    <LinearLayout
+        android:id="@+id/profile_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:background="@drawable/profile_frame"
+        android:padding="24dp"
+        android:gravity="center"
+        android:elevation="4dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Profile Picture ImageView -->
+        <ImageView
+            android:id="@+id/profile_avatar"
+            android:layout_width="90dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/profile_picture"
+            android:contentDescription="Profile Picture"
+            android:scaleType="centerCrop"
+            android:background="@android:color/transparent" />
+
+        <!-- Name Text -->
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:textSize="20sp"
+            android:textColor="@android:color/holo_blue_dark"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- Email Text -->
+        <TextView
+            android:id="@+id/profile_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="dummy@gmail.com"
+            android:textSize="14sp"
+            android:textColor="#808080"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- Diaries Written Text -->
+        <TextView
+            android:id="@+id/diaries_written"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Diaries Written: 10"
+            android:textSize="14sp"
+            android:textColor="#808080"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- Settings and Log Out Icons -->
+        <LinearLayout
+            android:id="@+id/icon_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Settings Button -->
+            <LinearLayout
+                android:id="@+id/settings_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="24dp"
+                android:gravity="center"
+                android:layout_marginBottom="10dp">
+
+                <ImageView
+                    android:id="@+id/settings_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/setting"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Settings" />
+
+                <ImageView
+                    android:id="@+id/settings_text_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/seting_text"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <!-- Log Out Button -->
+            <LinearLayout
+                android:id="@+id/logout_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="10dp">
+
+                <ImageView
+                    android:id="@+id/logout_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/logout"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Log Out" />
+
+                <ImageView
+                    android:id="@+id/logout_text_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/logout_text"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Profile Frame Decorations -->
+    <ImageView
+        android:id="@+id/decor1"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/profile_frame_decor1"
+        android:layout_alignTop="@id/profile_card"
+        android:layout_alignStart="@id/profile_card"
+        android:layout_marginStart="-20dp"
+        android:layout_marginTop="-20dp" />
+
+    <ImageView
+        android:id="@+id/decor2"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/profile_frame_decor2"
+        android:layout_alignBottom="@id/profile_card"
+        android:layout_alignEnd="@id/profile_card"
+        android:layout_marginEnd="-20dp"
+        android:layout_marginBottom="-20dp" />
+</RelativeLayout>
+

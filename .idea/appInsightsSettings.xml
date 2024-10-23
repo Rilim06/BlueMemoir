@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.bluememoir" />
+                  <option name="mobileSdkAppId" value="1:546152925779:android:b1c5f6d75b64c1e7bb54a6" />
+                  <option name="projectId" value="bluememoir-27502" />
+                  <option name="projectNumber" value="546152925779" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
