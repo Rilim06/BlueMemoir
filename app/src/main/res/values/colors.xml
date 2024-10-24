@@ -15,8 +15,11 @@
     <color name="font1">#464A4C</color>
     <color name="font2">#3D91C4</color>
     <color name="font3">#68BFEC</color>
+    <color name="font3Darker">#4A98C2</color>"
     <color name="font4">#81809E</color>
     <color name="font5">#33384B</color>
+    <color name="font6">#9D84D5</color>
+    <color name="tagButton">#F1F9FE</color>
     <color name="loginButton">#88CCF1</color>
     <color name="loginButtonDarker">#5EA1C4</color>
     <color name="or">#7D8A95</color>
