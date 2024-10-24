@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/addeditbg"
     tools:context=".AddDiary">
 
@@ -12,11 +13,219 @@
         android:orientation="vertical"
         android:padding="28dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/circle_background"
+                    android:src="@drawable/back"
+                    android:paddingEnd="3dp"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@string/nextButton" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+
+            <ImageButton
+                    android:id="@+id/saveButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/circle_background"
+                    android:src="@drawable/save"
+
+                    android:scaleType="centerInside"
+                    android:contentDescription="@string/nextButton" />
+        </LinearLayout>
+
         <View
             android:layout_width="wrap_content"
-            android:layout_height="200dp"/>
+            android:layout_height="30dp" />
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/baloo"
+                    android:text="@string/dummy_date"
+                    android:textColor="@color/font6"
+                    android:textSize="20sp" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/addPhoto"
+                        android:layout_width="115dp"
+                        android:layout_height="100dp"
+                        android:background="@drawable/insert_image_background"
+                        android:scaleType="centerCrop"
+                        android:padding="20dp"
+                        android:contentDescription="@string/google"
+                        android:src="@drawable/photo_icon" />
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/photoCardView"
+                        android:layout_width="115dp"
+                        android:layout_height="100dp"
+                        app:cardBackgroundColor="@color/font3"
+                        android:visibility="gone"
+                        app:cardCornerRadius="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <androidx.cardview.widget.CardView
+                                android:id="@+id/photoCardView2"
+                                android:layout_width="105dp"
+                                android:layout_height="90dp"
+                                app:cardBackgroundColor="@color/font3"
+                                app:cardCornerRadius="16dp">
+
+                                <ImageView
+                                    android:id="@+id/photoView"
+                                    android:layout_width="105dp"
+                                    android:layout_height="90dp"
+                                    android:background="@drawable/insert_image_background"
+                                    android:scaleType="centerCrop"
+                                    android:contentDescription="@string/google" />
+                            </androidx.cardview.widget.CardView>
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <ImageButton
+                        android:id="@+id/changeButton"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="@drawable/circle_background"
+                        android:src="@drawable/change"
+                        android:paddingTop="0.5dp"
+                        android:visibility="gone"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="68dp"
+                        android:scaleType="centerInside"
+                        android:contentDescription="@string/nextButton" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+
+                <EditText
+                    android:id="@+id/addTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=" "
+                    android:background="@drawable/rounded_input"
+                    android:fontFamily="@font/baloo"
+                    android:hint="@string/add_title"
+                    android:inputType="textMultiLine"
+                    android:minHeight="48dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:textColor="@color/font3"
+                    android:textColorHint="@color/font3"
+                    android:textSize="24sp" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/addLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=" "
+                    android:background="@drawable/rounded_input"
+                    android:fontFamily="@font/baloo"
+                    android:text="@string/dummy_location"
+                    android:minHeight="48dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="3dp"
+                    android:textColor="@color/font3"
+                    android:textColorHint="@color/font3"
+                    android:textSize="24sp" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/addTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=" "
+                    android:background="@drawable/rounded_input"
+                    android:fontFamily="@font/baloo"
+                    android:minHeight="48dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="3dp"
+                    android:text="@string/add_tag"
+                    android:textColor="@color/font3"
+                    android:textColorHint="@color/font3"
+                    android:textSize="24sp" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp" />
+
+                <EditText
+                    android:id="@+id/addText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=" "
+                    android:background="@drawable/rounded_input"
+                    android:fontFamily="@font/baloo"
+                    android:hint="@string/add_text"
+                    android:inputType="textMultiLine"
+                    android:minHeight="48dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:textColor="@color/font3"
+                    android:textColorHint="@color/font3"
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+        </ScrollView>
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
     </LinearLayout>
-
-
 </RelativeLayout>

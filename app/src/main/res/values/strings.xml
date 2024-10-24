@@ -25,4 +25,13 @@
     <string name="facebook">Facebook</string>
     <string name="to_sign_up">Don\'t have an account?</string>
     <string name="to_sign_in">Already have an account?</string>
+    <string name="dummy_date">23/10/2024</string>
+    <string name="dummy_location">Abydos</string>
+    <string name="add_title">Title...</string>
+    <string name="add_location">Location...</string>
+    <string name="add_tag">Travel</string>
+    <string name="add_text">Text...</string>
+    <string name="search">Search</string>
+    <string name="tag">Tag</string>
+    <string name="no_diary">You have not written any diary</string>
 </resources>
