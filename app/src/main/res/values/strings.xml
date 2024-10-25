@@ -10,6 +10,7 @@
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
     <string name="sign_out">Sign Out</string>
+    <string name="setting">Settings</string>
     <string name="email">Email Address</string>
     <string name="enter_email">Enter Email Address</string>
     <string name="pass">Password</string>
@@ -34,4 +35,12 @@
     <string name="search">Search</string>
     <string name="tag">Tag</string>
     <string name="no_diary">You have not written any diary</string>
+    <string name="no_favorite">You have not added any favorites</string>
+    <string name="diary_count">Diaries Written: 10</string>
+    <string name="user">User</string>
+    <string name="allow">Allow</string>
+    <string name="name">Name</string>
+    <string name="new_pass">New Password</string>
+    <string name="notif">Notification</string>
+    <string name="save">Save</string>
 </resources>

@@ -1,21 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/profilebg"
     tools:context=".Profile">
 
-    <Button
-        android:id="@+id/logoutButton"
+    <!-- Profile Card Container with Frame -->
+    <LinearLayout
+        android:id="@+id/profile_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_out"
-        android:layout_gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:layout_margin="30dp"
+        android:background="@drawable/profile_frame"
+        android:padding="24dp"
+        android:gravity="center"
+        android:elevation="4dp">
+
+        <!-- Profile Picture -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/photoCardView"
+            android:layout_width="95dp"
+            android:layout_height="95dp"
+            app:cardBackgroundColor="@color/font3"
+            app:cardCornerRadius="80dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/photoCardView2"
+                    android:layout_width="85dp"
+                    android:layout_height="85dp"
+                    app:cardBackgroundColor="@color/font3"
+                    app:cardCornerRadius="80dp">
+
+                    <ImageView
+                        android:id="@+id/profileView"
+                        android:layout_width="85dp"
+                        android:layout_height="85dp"
+                        android:src="@drawable/photo_no"
+                        android:background="@drawable/profile_pic_background"
+                        android:padding="20dp"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@string/google" />
+
+                    <ImageView
+                        android:id="@+id/photoView"
+                        android:layout_width="85dp"
+                        android:layout_height="85dp"
+                        android:visibility="gone"
+                        android:background="@drawable/profile_pic_background"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@string/google" />
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Name Text -->
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user"
+            android:fontFamily="@font/baloo"
+            android:textSize="30sp"
+            android:textColor="@color/font2"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- Email Text -->
+        <TextView
+            android:id="@+id/profile_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/email"
+            android:fontFamily="@font/baloo"
+            android:textSize="14sp"
+            android:textColor="@color/lightgrey"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- Diaries Written Text -->
+        <TextView
+            android:id="@+id/diaries_written"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/diary_count"
+            android:fontFamily="@font/baloo"
+            android:textSize="14sp"
+            android:textColor="@color/lightgrey"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- Settings and Log Out Icons -->
+        <LinearLayout
+            android:id="@+id/icon_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Settings Button -->
+            <LinearLayout
+                android:id="@+id/settings_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="24dp"
+                android:gravity="center"
+                android:layout_marginBottom="10dp">
+
+                <ImageButton
+                    android:id="@+id/settings_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/setting"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/setting" />
+
+                <TextView
+                    android:id="@+id/settings_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setting"
+                    android:textSize="14sp"
+                    android:textColor="@color/font2"
+                    android:fontFamily="@font/baloo"
+                    android:gravity="center" />
+            </LinearLayout>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Log Out Button -->
+            <LinearLayout
+                android:id="@+id/logout_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="10dp">
+
+                <ImageButton
+                    android:id="@+id/logoutButton"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/logout"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/sign_out" />
+
+                <!-- Ganti ImageView untuk teks dengan TextView -->
+                <TextView
+                    android:id="@+id/logout_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_out"
+                    android:textSize="14sp"
+                    android:textColor="@color/font2"
+                    android:fontFamily="@font/baloo"
+                    android:gravity="center" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Profile Frame Decorations -->
+    <ImageView
+        android:id="@+id/decor1"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/profile_frame_decor1"
+        android:layout_alignTop="@id/profile_card"
+        android:layout_alignStart="@id/profile_card"
+        android:layout_marginStart="-20dp"
+        android:contentDescription="@string/dummy_location"
+        android:layout_marginTop="-20dp"
+        android:translationZ="10dp"/>
+
+    <ImageView
+        android:id="@+id/decor2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/profile_frame_decor2"
+        android:layout_alignBottom="@id/profile_card"
+        android:layout_alignEnd="@id/profile_card"
+        android:layout_marginEnd="-20dp"
+        android:contentDescription="@string/dummy_location"
+        android:layout_marginBottom="-20dp"
+        android:translationZ="10dp"/>
+
+</RelativeLayout>

@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="false"
+    android:focusable="false"
     tools:context=".HomeDiary">
 
     <LinearLayout
@@ -13,27 +14,35 @@
         android:background="@drawable/insert_image_background"
         android:gravity="center"
         android:padding="20dp"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        android:clickable="false"
+        android:focusable="false">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/photoCardView"
             android:layout_width="115dp"
             android:layout_height="100dp"
             app:cardBackgroundColor="@color/font3"
-            app:cardCornerRadius="16dp">
+            app:cardCornerRadius="16dp"
+            android:clickable="false"
+            android:focusable="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:clickable="false"
+                android:focusable="false">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/photoCardView2"
                     android:layout_width="105dp"
                     android:layout_height="90dp"
                     app:cardBackgroundColor="@color/font3"
-                    app:cardCornerRadius="16dp">
+                    app:cardCornerRadius="16dp"
+                    android:clickable="false"
+                    android:focusable="false">
 
                     <ImageView
                         android:id="@+id/photoView"
@@ -41,7 +50,9 @@
                         android:layout_height="90dp"
                         android:background="@drawable/insert_image_background"
                         android:scaleType="centerCrop"
-                        android:contentDescription="@string/google" />
+                        android:contentDescription="@string/google"
+                        android:clickable="false"
+                        android:focusable="false" />
                 </androidx.cardview.widget.CardView>
 
             </LinearLayout>
@@ -52,7 +63,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="false"
+            android:focusable="false">
 
             <TextView
                 android:id="@+id/dateView"
@@ -63,7 +76,9 @@
                 android:textColor="@color/loginButton"
                 android:gravity="center"
                 android:layout_weight="0.1"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:clickable="false"
+                android:focusable="false" />
 
             <TextView
                 android:id="@+id/titleView"
@@ -73,7 +88,9 @@
                 android:text="@string/dummy_date"
                 android:textColor="@color/loginButton"
                 android:layout_weight="0.9"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:clickable="false"
+                android:focusable="false" />
 
         </LinearLayout>
     </LinearLayout>

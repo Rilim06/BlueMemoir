@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
@@ -29,6 +30,7 @@ import com.google.firebase.storage.StorageReference
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.suspendCancellableCoroutine
 import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.FieldValue
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +38,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class AddDiary : Fragment() {
 
@@ -45,6 +50,7 @@ class AddDiary : Fragment() {
     private lateinit var photoChange: ImageButton
     private lateinit var photoCard: CardView
     private lateinit var backButton: ImageButton
+    private lateinit var dateText: TextView
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
@@ -107,6 +113,11 @@ class AddDiary : Fragment() {
         photoChange = view.findViewById(R.id.changeButton) // ChangeButton ID
         photoCard = view.findViewById(R.id.photoCardView) // photoCard ID
         backButton = view.findViewById(R.id.backButton) // BackButton ID
+        dateText = view.findViewById(R.id.date) // DateText ID
+
+        val currentDate = Calendar.getInstance().time
+        val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(currentDate)
+        dateText.text = formattedDate
 
         backButton.setOnClickListener{
             (activity as MainActivity).replaceFragment(Home())
@@ -182,7 +193,8 @@ class AddDiary : Fragment() {
         val latitude = "0.0" // Dummy data
         val longitude = "0.0" // Dummy data
         val tagId = "kJ3nw0aB27e4fgLnWlt3" // Travel
-        val date = "24/10/2024" // Dummy
+        val currentDate = Calendar.getInstance().time
+        val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(currentDate)
         val title = view?.findViewById<EditText>(R.id.addTitle)
         val text = view?.findViewById<EditText>(R.id.addText)
 
@@ -205,7 +217,8 @@ class AddDiary : Fragment() {
                 "photo" to downloadPath,
                 "text" to bodyText,
                 "isFavorite" to false,
-                "date" to date
+                "date" to formattedDate,
+                "createdAt" to FieldValue.serverTimestamp()
             )
 
             val detailIdNew = firestore.collection("DiaryDetail").add(diaryDetail).await() // Await the result to get document reference
@@ -222,7 +235,8 @@ class AddDiary : Fragment() {
                 "tagId" to tagId,
                 "locationId" to location,
                 "detailId" to detailId,
-                "userId" to userId
+                "userId" to userId,
+                "createdAt" to FieldValue.serverTimestamp()
             )
 
             firestore.collection("Diary")
