@@ -66,7 +66,7 @@ class Profile : Fragment() {
         val settingsButton = view.findViewById<ImageView>(R.id.settings_icon)
         settingsButton.setOnClickListener {
             // Navigate to settings page
-            startActivity(Intent(activity, SettingsFragment::class.java))
+            startActivity(Intent(activity, SettingFragment::class.java))
         }
 
         // Handle profile picture click to show it in larger size
