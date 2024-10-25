@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <ImageButton
                 android:id="@+id/backButton"
                 android:layout_width="50dp"
@@ -31,6 +32,20 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/deleteButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_background"
+                android:src="@drawable/delete"
+                android:scaleType="centerInside"
+                android:contentDescription="@string/nextButton" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
 
             <ImageButton
                 android:id="@+id/favoriteButton"

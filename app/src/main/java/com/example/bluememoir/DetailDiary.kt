@@ -23,6 +23,8 @@ class DetailDiary : Fragment() {
     private lateinit var favoriteButton: ImageButton
     private lateinit var backButton: ImageButton
     private lateinit var editButton: ImageButton
+    private lateinit var deleteButton: ImageButton
+
     private lateinit var db: FirebaseFirestore
     private var isFavorite: Boolean = false
 
@@ -49,6 +51,7 @@ class DetailDiary : Fragment() {
         photoView = view.findViewById(R.id.photoView)
         viewText = view.findViewById(R.id.viewText)
         favoriteButton = view.findViewById(R.id.favoriteButton)
+        deleteButton = view.findViewById(R.id.deleteButton)
         backButton = view.findViewById(R.id.backButton)
         editButton = view.findViewById(R.id.editButton)
 
@@ -63,6 +66,40 @@ class DetailDiary : Fragment() {
         backButton.setOnClickListener{
             (activity as MainActivity).replaceFragment(Home())
         }
+
+        deleteButton.setOnClickListener {
+            detailId?.let { id ->
+                // First, delete the diary entry from DiaryDetail
+                db.collection("DiaryDetail").document(id)
+                    .delete()
+                    .addOnSuccessListener {
+                        db.collection("Diary")
+                            .whereEqualTo("detailId", id) // Fetch the Diary document where detailId matches
+                            .get()
+                            .addOnSuccessListener { diaryResult ->
+                                if (!diaryResult.isEmpty) {
+                                    for (diaryDoc in diaryResult) {
+                                        diaryDoc.reference.delete() // Delete the Diary document
+                                        Log.d("DetailDiary", "Deleted Diary entry with id: ${diaryDoc.id}")
+                                    }
+                                    Toast.makeText(requireContext(), "Diary entry deleted", Toast.LENGTH_SHORT).show()
+                                }
+                                // Optionally, navigate back to the previous fragment or home
+                                (activity as MainActivity).replaceFragment(Home())
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(requireContext(), "Failed to delete diary entry from Diary: $e", Toast.LENGTH_SHORT).show()
+                                Log.e("DetailDiary", "Error deleting diary entry from Diary", e)
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to delete diary entry from DiaryDetail: $e", Toast.LENGTH_SHORT).show()
+                        Log.e("DetailDiary", "Error deleting diary entry from DiaryDetail", e)
+                    }
+            } ?: Log.e("DetailDiary", "detailId is null when trying to delete diary entry")
+        }
+
+
 
         editButton.setOnClickListener {
             val editFragment = EditDiary()
