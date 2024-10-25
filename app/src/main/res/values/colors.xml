@@ -20,4 +20,5 @@
     <color name="loginButton">#88CCF1</color>
     <color name="loginButtonDarker">#5EA1C4</color>
     <color name="or">#7D8A95</color>
+    <color name="lightgrey">#aaaaaa</color>
 </resources>

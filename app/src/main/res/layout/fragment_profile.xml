@@ -43,8 +43,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Name"
-            android:textSize="20sp"
-            android:textColor="@android:color/holo_blue_dark"
+            android:fontFamily="@font/baloo"
+            android:textSize="30sp"
+            android:textColor="@color/font2"
             android:layout_marginTop="16dp"
             android:layout_gravity="center_horizontal" />
 
@@ -54,8 +55,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="dummy@gmail.com"
+            android:fontFamily="@font/baloo"
             android:textSize="14sp"
-            android:textColor="#808080"
+            android:textColor="@color/lightgrey"
             android:layout_marginTop="8dp"
             android:layout_gravity="center_horizontal" />
 
@@ -64,9 +66,10 @@
             android:id="@+id/diaries_written"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Diaries Written: 10"
+            android:text="Diaries Written: -"
+            android:fontFamily="@font/baloo"
             android:textSize="14sp"
-            android:textColor="#808080"
+            android:textColor="@color/lightgrey"
             android:layout_marginTop="8dp"
             android:layout_gravity="center_horizontal" />
 
@@ -97,13 +100,18 @@
                     android:background="@android:color/transparent"
                     android:contentDescription="Settings" />
 
-                <ImageView
-                    android:id="@+id/settings_text_image"
+                <!-- Ganti ImageView untuk teks dengan TextView -->
+                <TextView
+                    android:id="@+id/settings_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/seting_text"
-                    android:layout_marginTop="8dp" />
+                    android:text="Settings"
+                    android:textSize="14sp"
+                    android:textColor="@color/font2"
+                    android:fontFamily="@font/baloo"
+                    android:gravity="center" />
             </LinearLayout>
+
 
             <!-- Log Out Button -->
             <LinearLayout
@@ -122,13 +130,18 @@
                     android:background="@android:color/transparent"
                     android:contentDescription="Log Out" />
 
-                <ImageView
-                    android:id="@+id/logout_text_image"
+                <!-- Ganti ImageView untuk teks dengan TextView -->
+                <TextView
+                    android:id="@+id/logout_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/logout_text"
-                    android:layout_marginTop="8dp" />
+                    android:text="Log Out"
+                    android:textSize="14sp"
+                    android:textColor="@color/font2"
+                    android:fontFamily="@font/baloo"
+                    android:gravity="center" />
             </LinearLayout>
+
         </LinearLayout>
     </LinearLayout>
 
