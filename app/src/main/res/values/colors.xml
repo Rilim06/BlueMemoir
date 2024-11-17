@@ -19,8 +19,10 @@
     <color name="font4">#81809E</color>
     <color name="font5">#33384B</color>
     <color name="font6">#9D84D5</color>
+    <color name="font7">#E86FA3</color>
     <color name="tagButton">#F1F9FE</color>
     <color name="loginButton">#88CCF1</color>
     <color name="loginButtonDarker">#5EA1C4</color>
     <color name="or">#7D8A95</color>
+    <color name="lightgrey">#3D5A80</color>
 </resources>

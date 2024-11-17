@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.net.Uri
+import android.util.Log
 
 class Home : Fragment() {
 
@@ -38,7 +39,9 @@ class Home : Fragment() {
         recyclerView = view.findViewById(R.id.homeView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = MyAdapter(dataList)
+        adapter = MyAdapter(dataList) { detailId ->
+            navigateToDetailDiary(detailId)
+        }
         recyclerView.adapter = adapter
 
         auth = FirebaseAuth.getInstance()
@@ -48,10 +51,12 @@ class Home : Fragment() {
         if (currentUser != null) {
             val userId = currentUser.uid
             var documentsProcessed = 0
+            val tempDataList = mutableListOf<MyModel>()
 
             // Fetch Diary collection filtered by the logged-in user
             db.collection("Diary")
                 .whereEqualTo("userId", userId)
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener { result ->
                     for (document in result) {
@@ -64,18 +69,27 @@ class Home : Fragment() {
                                 val title = detailDocument.getString("title") ?: ""
                                 val date = detailDocument.getString("date") ?: ""
                                 val imagePath = detailDocument.getString("photo") ?: ""
+                                val id = detailDocument.id
+                                Log.d("DetailDiary", "Retrieved detailId: $detailId")
 
                                 // Add to dataList
-                                val model = MyModel(title, date, imagePath)
-                                dataList.add(model)
+                                val model = MyModel(id, title, date, imagePath)
+                                tempDataList.add(model)
 
                                 documentsProcessed++
 
-                                // Notify adapter of data change
-                                adapter.notifyDataSetChanged()
-
                                 if (documentsProcessed == result.size()) {
-                                    checkData() // Call checkData only after all documents are processed
+                                    tempDataList.sortByDescending { it.date }
+
+                                    // Clear the original data list and add sorted data
+                                    dataList.clear()
+                                    dataList.addAll(tempDataList)
+
+                                    // Notify adapter of data change once
+                                    adapter.notifyDataSetChanged()
+
+                                    // Call checkData after all data has been processed and added
+                                    checkData()
                                 }
                             }
                     }
@@ -90,8 +104,52 @@ class Home : Fragment() {
             (activity as MainActivity).replaceFragment(AddDiary())
         }
 
+        val allButton = view.findViewById<ImageButton>(R.id.seeAllButton)
+        allButton.setOnClickListener {
+            (activity as MainActivity).replaceFragment(AllDiary())
+        }
+
+        val recentButton = view.findViewById<ImageButton>(R.id.recentButton)
+        val oldestButton = view.findViewById<ImageButton>(R.id.oldestButton)
+
+        recentButton.setOnClickListener {
+            recentData()
+            recentButton.visibility = View.GONE
+            oldestButton.visibility = View.VISIBLE
+        }
+
+        oldestButton.setOnClickListener {
+            oldestData()
+            recentButton.visibility = View.VISIBLE
+            oldestButton.visibility = View.GONE
+        }
+
         return view
     }
+
+    private fun recentData() {
+        // Sort dataList by date in descending order (recent first)
+        dataList.sortByDescending { it.date }
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun oldestData() {
+        // Sort dataList by date in ascending order (oldest first)
+        dataList.sortBy { it.date }
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun navigateToDetailDiary(detailId: String) {
+        // Create the DetailDiary fragment instance
+        val detailFragment = DetailDiary()
+        val bundle = Bundle().apply {
+            putString("detailId", detailId)
+        }
+        detailFragment.arguments = bundle
+
+        (activity as MainActivity).replaceFragment(detailFragment)
+    }
+
 
     private fun checkData() {
         if (dataList.isEmpty()) {

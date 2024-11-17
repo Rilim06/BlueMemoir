@@ -68,6 +68,23 @@
                 android:layout_marginTop="1dp"
                 android:layout_marginEnd="7dp"
                 android:layout_weight="0.5"
+                android:visibility="gone"
+                android:contentDescription="@string/google"/>
+
+            <ImageButton
+                android:id="@+id/oldestButton"
+                android:layout_width="wrap_content"
+                android:layout_height="120dp"
+                android:padding="12dp"
+                android:background="@drawable/oldest_button"
+                android:fontFamily="@font/baloo"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:backgroundTint="@null"
+                android:text="@string/loginButton"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="7dp"
+                android:layout_weight="0.5"
                 android:contentDescription="@string/google"/>
 
             <ImageButton
@@ -107,6 +124,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="16dp"
+            android:clickable="false"
+            android:focusable="false"
             android:scrollbars="none" />
 
         <View

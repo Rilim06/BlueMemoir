@@ -13,7 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
@@ -34,21 +34,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
-class EditDiary : Fragment() {
+class Setting : Fragment() {
 
-    private lateinit var imageButton: ImageButton
-    private lateinit var saveButton: ImageButton
+    private lateinit var saveButton: Button
+    private lateinit var profileView: ImageView
     private lateinit var photoView: ImageView
-    private lateinit var photoChange: ImageButton
-    private lateinit var photoCard: CardView
-    private lateinit var backButton: ImageButton
-    private lateinit var dateText: TextView
-    private lateinit var titleField: EditText
-    private lateinit var textField: EditText
+    private lateinit var changePhotoButton: ImageButton
+    private lateinit var nameField: EditText
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
@@ -57,11 +50,7 @@ class EditDiary : Fragment() {
     private lateinit var storage: FirebaseStorage
     private lateinit var storageReference: StorageReference
     private lateinit var auth: FirebaseAuth
-    private var downloadPath: String? = null
-    private var detailId: String? = null // Added detailId
-
-    private var initialTitle: String? = null
-    private var initialText: String? = null
+    private var initialName: String? = null
     private var initialPhotoUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,15 +62,13 @@ class EditDiary : Fragment() {
         storageReference = storage.reference
         auth = FirebaseAuth.getInstance()
 
-        detailId = arguments?.getString("detailId") // Retrieve detailId
-
         // Initialize result launchers for camera and gallery
         cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val bitmap = result.data?.extras?.get("data") as Bitmap
                 swapView()
-                photoView.setImageBitmap(bitmap)
                 photoUri = saveImageToCache(bitmap)
+                photoView.setImageBitmap(bitmap)
             }
         }
 
@@ -100,59 +87,99 @@ class EditDiary : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_add_diary, container, false)
+        val view = inflater.inflate(R.layout.fragment_setting, container, false)
 
         // Initialize UI components
-        imageButton = view.findViewById(R.id.addPhoto)
         saveButton = view.findViewById(R.id.saveButton)
+        profileView = view.findViewById(R.id.profileView)
         photoView = view.findViewById(R.id.photoView)
-        photoChange = view.findViewById(R.id.changeButton)
-        photoCard = view.findViewById(R.id.photoCardView)
-        backButton = view.findViewById(R.id.backButton)
-        dateText = view.findViewById(R.id.date)
-        titleField = view.findViewById(R.id.addTitle)
-        textField = view.findViewById(R.id.addText)
-
-        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().time)
-        dateText.text = currentDate
-
-        backButton.setOnClickListener { (activity as MainActivity).replaceFragment(Home()) }
+        changePhotoButton = view.findViewById(R.id.changeButton)
+        nameField = view.findViewById(R.id.addName)
 
         // Load initial data from Firebase
-        loadDiaryData()
-
-        imageButton.setOnClickListener { showImageSourceDialog() }
-        photoChange.setOnClickListener { showImageSourceDialog() }
+        loadProfileData()
 
         saveButton.setOnClickListener {
-            if (titleField.text.isNotEmpty() && textField.text.isNotEmpty()) {
-                updateDiary()
+            if (nameField.text.isNotEmpty()) {
+                updateProfile()
             } else {
-                Toast.makeText(requireContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please fill the name field", Toast.LENGTH_SHORT).show()
             }
         }
+
+        changePhotoButton.setOnClickListener { showImageSourceDialog() }
 
         return view
     }
 
-    private fun loadDiaryData() {
-        detailId?.let { id ->
-            firestore.collection("DiaryDetail").document(id).get().addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    initialTitle = document.getString("title")
-                    initialText = document.getString("text")
+    private fun swapView() {
+        profileView.visibility = View.GONE
+        photoView.visibility = View.VISIBLE
+    }
+
+    private fun loadProfileData() {
+        val userId = auth.currentUser?.uid ?: return
+
+        // Query to get the document ID for the current user's profile
+        firestore.collection("Profile")
+            .whereEqualTo("userId", userId) // Assuming you have a userId field in your Profile collection
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents[0] // Get the first document
+                    initialName = document.getString("name")
                     initialPhotoUrl = document.getString("photo")
 
-                    titleField.setText(initialTitle)
-                    textField.setText(initialText)
-                    Glide.with(this).load(initialPhotoUrl).into(photoView)
-                    swapView()
+                    nameField.setText(initialName)
+                    if (initialPhotoUrl != null) {
+                        swapView()
+                        Glide.with(this).load(initialPhotoUrl).into(photoView)
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No profile found", Toast.LENGTH_SHORT).show()
                 }
-            }.addOnFailureListener { exception ->
+            }
+            .addOnFailureListener { exception ->
                 Toast.makeText(requireContext(), "Failed to load data: ${exception.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun updateProfile() {
+        val userId = auth.currentUser?.uid ?: return
+        val updateData = mutableMapOf<String, Any?>("name" to nameField.text.toString())
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // Query to get the document ID for the current user's profile
+            val querySnapshot = firestore.collection("Profile")
+                .whereEqualTo("userId", userId) // Assuming you have a userId field in your Profile collection
+                .get()
+                .await() // Wait for the result
+
+            if (!querySnapshot.isEmpty) {
+                val documentId = querySnapshot.documents[0].id // Get the document ID
+
+                if (photoUri != null) {
+                    updateData["photo"] = withContext(Dispatchers.IO) { uploadImageToFirebase(photoUri!!) }
+                } else {
+                    updateData["photo"] = initialPhotoUrl
+                }
+
+                firestore.collection("Profile").document(documentId) // Update using the document ID
+                    .update(updateData)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                        loadProfileData() // Refresh data
+                        (activity as MainActivity).replaceFragment(Profile())
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to update profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            } else {
+                Toast.makeText(requireContext(), "No profile found to update", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun showImageSourceDialog() {
         val options = arrayOf("Camera", "Gallery")
@@ -190,48 +217,11 @@ class EditDiary : Fragment() {
         return Uri.parse(path)
     }
 
-    private fun updateDiary() {
-        val title = if (titleField.text.toString().isNotEmpty()) titleField.text.toString() else initialTitle
-        val text = if (textField.text.toString().isNotEmpty()) textField.text.toString() else initialText
-        val updateData = mutableMapOf<String, Any?>("title" to title, "text" to text)
-
-        CoroutineScope(Dispatchers.Main).launch {
-            Toast.makeText(requireContext(), "Updating Diary...", Toast.LENGTH_SHORT).show()
-
-            if (photoUri != null) {
-                updateData["photo"] = withContext(Dispatchers.IO) { uploadImageToFirebase(photoUri!!) }
-            } else {
-                updateData["photo"] = initialPhotoUrl
-            }
-
-            detailId?.let { id ->
-                firestore.collection("DiaryDetail").document(id)
-                    .update(updateData)
-                    .addOnSuccessListener {
-                        redirectToHome()
-                        Toast.makeText(requireContext(), "Diary updated successfully!", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), "Failed to update diary: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-        }
-    }
 
     private suspend fun uploadImageToFirebase(imageUri: Uri): String = withContext(Dispatchers.IO) {
-        val fileName = "images/${System.currentTimeMillis()}.jpg"
+        val fileName = "profile_images/${System.currentTimeMillis()}.jpg"
         val fileReference = storageReference.child(fileName)
         fileReference.putFile(imageUri).await()
         fileReference.downloadUrl.await().toString()
-    }
-
-    private fun swapView() {
-        imageButton.visibility = View.GONE
-        photoChange.visibility = View.VISIBLE
-        photoCard.visibility = View.VISIBLE
-    }
-
-    private fun redirectToHome() {
-        (activity as MainActivity).replaceFragment(Home())
     }
 }

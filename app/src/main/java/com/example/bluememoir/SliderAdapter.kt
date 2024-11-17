@@ -3,28 +3,25 @@ package com.example.bluememoir
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
 import android.widget.ImageView
 import android.widget.TextView
-import com.google.firebase.storage.FirebaseStorage
-import android.util.Log
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-
-class MyAdapter(
-    private val dataList: List<MyModel>,
+class SliderAdapter(
+    private val dataList: List<MyModel>, // Pass the data for the slider
     private val clickListener: (String) -> Unit // Passes detailId to handle clicks
-) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+) : RecyclerView.Adapter<SliderAdapter.SliderViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
-        return MyViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SliderViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_slider_layout, parent, false)
+        return SliderViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SliderViewHolder, position: Int) {
         val model = dataList[position]
         holder.bind(model)
-        // Set up click listener for each item in the RecyclerView
+        // Set up click listener for each slider item
         holder.itemView.setOnClickListener {
             clickListener(model.detailId)
         }
@@ -32,7 +29,7 @@ class MyAdapter(
 
     override fun getItemCount(): Int = dataList.size
 
-    class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class SliderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val photoView: ImageView = itemView.findViewById(R.id.photoView)
         private val dateView: TextView = itemView.findViewById(R.id.dateView)
         private val titleView: TextView = itemView.findViewById(R.id.titleView)
@@ -47,4 +44,3 @@ class MyAdapter(
         }
     }
 }
-
