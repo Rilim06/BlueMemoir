@@ -43,4 +43,6 @@
     <string name="new_pass">New Password</string>
     <string name="notif">Notification</string>
     <string name="save">Save</string>
+    <string name="history">History</string>
+    <string name="newest">Newest</string>
 </resources>

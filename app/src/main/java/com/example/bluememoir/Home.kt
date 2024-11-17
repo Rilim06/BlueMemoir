@@ -104,7 +104,39 @@ class Home : Fragment() {
             (activity as MainActivity).replaceFragment(AddDiary())
         }
 
+        val allButton = view.findViewById<ImageButton>(R.id.seeAllButton)
+        allButton.setOnClickListener {
+            (activity as MainActivity).replaceFragment(AllDiary())
+        }
+
+        val recentButton = view.findViewById<ImageButton>(R.id.recentButton)
+        val oldestButton = view.findViewById<ImageButton>(R.id.oldestButton)
+
+        recentButton.setOnClickListener {
+            recentData()
+            recentButton.visibility = View.GONE
+            oldestButton.visibility = View.VISIBLE
+        }
+
+        oldestButton.setOnClickListener {
+            oldestData()
+            recentButton.visibility = View.VISIBLE
+            oldestButton.visibility = View.GONE
+        }
+
         return view
+    }
+
+    private fun recentData() {
+        // Sort dataList by date in descending order (recent first)
+        dataList.sortByDescending { it.date }
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun oldestData() {
+        // Sort dataList by date in ascending order (oldest first)
+        dataList.sortBy { it.date }
+        adapter.notifyDataSetChanged()
     }
 
     private fun navigateToDetailDiary(detailId: String) {
