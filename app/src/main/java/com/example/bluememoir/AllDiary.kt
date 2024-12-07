@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -25,6 +26,7 @@ class AllDiary : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerAdapter: MyAdapter
     private lateinit var noDiary: TextView
+    private lateinit var allDiary: LinearLayout
 
     private var sliderDataList = mutableListOf<MyModel>()
     private var recyclerDataList = mutableListOf<MyModel>()
@@ -49,6 +51,7 @@ class AllDiary : Fragment() {
         sliderViewPager = view.findViewById(R.id.sliderViewPager)
         recyclerView = view.findViewById(R.id.allView)
         noDiary = view.findViewById(R.id.noDiary)
+        allDiary = view.findViewById(R.id.belowSearchLayout)
 
         sliderAdapter = SliderAdapter(sliderDataList) { clickedDetailId ->
             navigateToDetailDiary(clickedDetailId)
@@ -87,40 +90,59 @@ class AllDiary : Fragment() {
                 val tempDataList = mutableListOf<MyModel>()
 
                 for (document in result) {
-                    val detailId = document.getString("detailId") ?: continue
+                    if (result.isEmpty) {
+                        noDiary.visibility = View.VISIBLE
+                        view?.findViewById<LinearLayout>(R.id.belowSearchLayout)?.visibility = View.GONE
+                    } else {
+                        noDiary.visibility = View.GONE
+                        view?.findViewById<LinearLayout>(R.id.belowSearchLayout)?.visibility = View.VISIBLE
+                        val detailId = document.getString("detailId") ?: continue
 
-                    db.collection("DiaryDetail").document(detailId)
-                        .get()
-                        .addOnSuccessListener { detailDocument ->
-                            val title = detailDocument.getString("title") ?: ""
-                            val date = detailDocument.getString("date") ?: ""
-                            val imagePath = detailDocument.getString("photo") ?: ""
-                            val id = detailDocument.id
-                            tempDataList.add(MyModel(id, title, date, imagePath))
+                        db.collection("DiaryDetail").document(detailId)
+                            .get()
+                            .addOnSuccessListener { detailDocument ->
+                                val title = detailDocument.getString("title") ?: ""
+                                val date = detailDocument.getString("date") ?: ""
+                                val imagePath = detailDocument.getString("photo") ?: ""
+                                val id = detailDocument.id
+                                tempDataList.add(MyModel(id, title, date, imagePath))
 
-                            documentsProcessed++
+                                documentsProcessed++
 
-                            if (documentsProcessed == result.size()) {
-                                tempDataList.sortByDescending { it.date }
-                                // Divide the data into sliderDataList and recyclerDataList
-                                sliderDataList.clear()
-                                recyclerDataList.clear()
+                                if (documentsProcessed == result.size()) {
+                                    tempDataList.sortByDescending { it.date }
+                                    // Divide the data into sliderDataList and recyclerDataList
+                                    sliderDataList.clear()
+                                    recyclerDataList.clear()
 
-                                sliderDataList.addAll(tempDataList.take(3)) // Take the first 3 for the slider
-                                recyclerDataList.addAll(tempDataList)
+                                    sliderDataList.addAll(tempDataList.take(3)) // Take the first 3 for the slider
+                                    recyclerDataList.addAll(tempDataList)
 
-                                sliderAdapter.notifyDataSetChanged()
-                                recyclerAdapter.notifyDataSetChanged()
+                                    sliderAdapter.notifyDataSetChanged()
+                                    recyclerAdapter.notifyDataSetChanged()
 
-                                // Start auto-scroll for the slider
-                                startAutoScroll()
+                                    checkData()
+
+                                    // Start auto-scroll for the slider
+                                    startAutoScroll()
+                                }
                             }
-                        }
+                    }
                 }
             }
             .addOnFailureListener { exception ->
                 Toast.makeText(requireContext(), "Error fetching data: $exception", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun checkData() {
+        if (recyclerDataList.isEmpty()) {
+            allDiary.visibility = View.GONE
+            noDiary.visibility = View.VISIBLE
+        } else {
+            allDiary.visibility = View.VISIBLE
+            noDiary.visibility = View.GONE
+        }
     }
 
     private fun navigateToDetailDiary(detailId: String) {
