@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -41,6 +42,8 @@ import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.google.android.gms.location.LocationServices
+import android.location.Geocoder
 
 class AddDiary : Fragment() {
 
@@ -50,7 +53,9 @@ class AddDiary : Fragment() {
     private lateinit var photoChange: ImageButton
     private lateinit var photoCard: CardView
     private lateinit var backButton: ImageButton
+    private lateinit var editLocationButton: ImageButton
     private lateinit var dateText: TextView
+    private lateinit var locationView: TextView
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
@@ -60,6 +65,12 @@ class AddDiary : Fragment() {
     private lateinit var storageReference: StorageReference
     private lateinit var auth: FirebaseAuth
     private var downloadPath: String? = null
+    private var latitude: String? = null
+    private var longitude: String? = null
+    private var country: String? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +79,18 @@ class AddDiary : Fragment() {
         storage = FirebaseStorage.getInstance()
         storageReference = storage.reference
         auth = FirebaseAuth.getInstance()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        // Request location permission
+        locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            if (granted) {
+                fetchLocation()
+            } else {
+                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // Register the camera and gallery result launchers
         cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -107,6 +130,8 @@ class AddDiary : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_add_diary, container, false)
 
+        fetchLocation()
+
         imageButton = view.findViewById(R.id.addPhoto) // ImageButton ID
         saveButton = view.findViewById(R.id.saveButton) // Add a save button
         photoView = view.findViewById(R.id.photoView) // ImageView ID
@@ -114,6 +139,8 @@ class AddDiary : Fragment() {
         photoCard = view.findViewById(R.id.photoCardView) // photoCard ID
         backButton = view.findViewById(R.id.backButton) // BackButton ID
         dateText = view.findViewById(R.id.date) // DateText ID
+        locationView = view.findViewById(R.id.addLocation) // LocationText ID
+        editLocationButton = view.findViewById(R.id.editLocationButton) // EditLocationButton ID
 
         val currentDate = Calendar.getInstance().time
         val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(currentDate)
@@ -124,11 +151,11 @@ class AddDiary : Fragment() {
         }
 
         imageButton.setOnClickListener {
-            showImageSourceDialog() // Show the dialog to select image source
+            showImageSourceDialog()
         }
 
         photoChange.setOnClickListener {
-            showImageSourceDialog() // Show the dialog to select image source
+            showImageSourceDialog()
         }
 
         saveButton.setOnClickListener {
@@ -136,13 +163,78 @@ class AddDiary : Fragment() {
             val text = view.findViewById<EditText>(R.id.addText)
 
             if(title != null && text != null && photoUri != null){
-                saveDiary() // Save diary details when save button is clicked
+                saveDiary()
             }else{
                 Toast.makeText(requireContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show()
             }
         }
 
+        editLocationButton.setOnClickListener {
+            val intent = Intent(requireContext(), LocationPickerActivity::class.java)
+            startActivityForResult(intent, LOCATION_PICKER_REQUEST_CODE)
+        }
+
         return view
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == LOCATION_PICKER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+
+            if (latitude != null && longitude != null) {
+                locationView.text = "Latitude: $latitude, Longitude: $longitude"
+                // Save to Firebase or any other required action
+            } else {
+                Toast.makeText(requireContext(), "Failed to retrieve location", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    companion object {
+        private const val LOCATION_PICKER_REQUEST_CODE = 1001
+    }
+
+    private fun fetchLocation() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    latitude = location.latitude.toString()
+                    longitude = location.longitude.toString()
+
+                    country = getCountryFromCoordinates(location.latitude, location.longitude)
+                    locationView.text = country
+                } else {
+                    Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            // Request location permissions
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun getCountryFromCoordinates(latitude: Double, longitude: Double): String? {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses!!.isNotEmpty()) {
+                addresses[0].countryName // Get country name
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun showImageSourceDialog() {
@@ -189,9 +281,9 @@ class AddDiary : Fragment() {
     }
 
     private fun saveDiary() {
-        val location = "Abydos" // Dummy data
-        val latitude = "0.0" // Dummy data
-        val longitude = "0.0" // Dummy data
+
+        val latitude = latitude
+        val longitude = longitude
         val tagId = "kJ3nw0aB27e4fgLnWlt3" // Travel
         val currentDate = Calendar.getInstance().time
         val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(currentDate)
@@ -229,11 +321,12 @@ class AddDiary : Fragment() {
                 "latitude" to latitude
             )
 
-            firestore.collection("Location").add(locationDetail)
+            val locationIdNew = firestore.collection("Location").add(locationDetail).await()
+            val locationId = locationIdNew.id
 
             val diary = hashMapOf(
                 "tagId" to tagId,
-                "locationId" to location,
+                "locationId" to locationId,
                 "detailId" to detailId,
                 "userId" to userId,
                 "createdAt" to FieldValue.serverTimestamp()
