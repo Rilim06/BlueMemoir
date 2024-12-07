@@ -34,7 +34,7 @@
     <string name="add_text">Text...</string>
     <string name="search">Search</string>
     <string name="tag">Tag</string>
-    <string name="no_diary">You have not written any diary</string>
+    <string name="no_diary">Diary not found</string>
     <string name="no_favorite">You have not added any favorites</string>
     <string name="diary_count">Diaries Written: 10</string>
     <string name="user">User</string>

@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 
 
 class MyAdapter(
-    private val dataList: List<MyModel>,
+    private var dataList: MutableList<MyModel>,
     private val clickListener: (String) -> Unit // Passes detailId to handle clicks
 ) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
@@ -45,6 +45,11 @@ class MyAdapter(
             dateView.text = model.date
             titleView.text = model.title
         }
+    }
+
+    fun updateData(newList: List<MyModel>) {
+        dataList = newList.toMutableList()
+        notifyDataSetChanged()
     }
 }
 
