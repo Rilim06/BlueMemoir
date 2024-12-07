@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">BlueMemoir</string>
     <string name="default_web_client_id">546152925779-273vidbeo0gpj7pvus6rhs3drp58vm35.apps.googleusercontent.com</string>
+    <string name="map_api">AIzaSyALY79PI3jsgnlIyxYsdA54hHdEdRQeb6M</string>
     <string name="navbar">Bottom Navigation</string>
     <string name="home">Home</string>
     <string name="favorites">Favorites</string>

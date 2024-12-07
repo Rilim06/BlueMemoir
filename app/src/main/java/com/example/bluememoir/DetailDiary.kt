@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
+import android.location.Geocoder
+import java.util.Locale
 
 class DetailDiary : Fragment() {
 
@@ -19,6 +21,7 @@ class DetailDiary : Fragment() {
     private lateinit var titleView: TextView
     private lateinit var dateView: TextView
     private lateinit var photoView: ImageView
+    private lateinit var locationView: TextView
     private lateinit var viewText: TextView
     private lateinit var favoriteButton: ImageButton
     private lateinit var backButton: ImageButton
@@ -50,6 +53,7 @@ class DetailDiary : Fragment() {
         dateView = view.findViewById(R.id.dateView)
         photoView = view.findViewById(R.id.photoView)
         viewText = view.findViewById(R.id.viewText)
+        locationView = view.findViewById(R.id.locationView)
         favoriteButton = view.findViewById(R.id.favoriteButton)
         deleteButton = view.findViewById(R.id.deleteButton)
         backButton = view.findViewById(R.id.backButton)
@@ -136,12 +140,84 @@ class DetailDiary : Fragment() {
                         isFavorite = document.getBoolean("isFavorite") ?: false
                         favoriteButton.isSelected = isFavorite
                     }
+                    fetchLocationId(id)
                 }
                 .addOnFailureListener { exception ->
                     Toast.makeText(requireContext(), "Error loading diary details: $exception", Toast.LENGTH_SHORT).show()
                     Log.e("DetailDiary", "Error loading diary details", exception)
                 }
         } ?: Log.e("DetailDiary", "detailId is null")
+    }
+
+    private fun fetchLocationId(detailId: String) {
+        db.collection("Diary")
+            .whereEqualTo("detailId", detailId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents[0]
+                    val locationId = document.getString("locationId")
+                    if (locationId != null) {
+                        // Fetch latitude and longitude based on locationId
+                        fetchLocationDetails(locationId)
+                    } else {
+                        Log.e("DetailDiary", "locationId is null")
+                    }
+                } else {
+                    Log.e("DetailDiary", "No Diary document found for detailId: $detailId")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Error fetching locationId: $exception", Toast.LENGTH_SHORT).show()
+                Log.e("DetailDiary", "Error fetching locationId", exception)
+            }
+    }
+
+    private fun fetchLocationDetails(locationId: String) {
+        db.collection("Location").document(locationId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val latitude = document.getString("latitude")
+                    val longitude = document.getString("longitude")
+
+                    if (latitude != null && longitude != null) {
+                        // Convert latitude and longitude to Double and fetch country name
+                        val latDouble = latitude.toDoubleOrNull()
+                        val lonDouble = longitude.toDoubleOrNull()
+
+                        if (latDouble != null && lonDouble != null) {
+                            val countryName = getCountryFromCoordinates(latDouble, lonDouble)
+                            locationView.text = countryName ?: "Country not found"
+                        } else {
+                            locationView.text = "Invalid coordinates"
+                        }
+                    } else {
+                        locationView.text = "Location details missing"
+                    }
+                } else {
+                    Log.e("DetailDiary", "Location document does not exist for locationId: $locationId")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Error fetching location details: $exception", Toast.LENGTH_SHORT).show()
+                Log.e("DetailDiary", "Error fetching location details", exception)
+            }
+    }
+
+    private fun getCountryFromCoordinates(latitude: Double, longitude: Double): String? {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses!!.isNotEmpty()) {
+                addresses[0].countryName // Extract country name
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun toggleFavoriteStatus() {
