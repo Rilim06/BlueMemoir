@@ -18,6 +18,10 @@ import java.util.Locale
 class DetailDiary : Fragment() {
 
     private var detailId: String? = null
+    private var latDouble: Double = 0.0
+    private var lonDouble: Double = 0.0
+    private var latitude: String = ""
+    private var longitude: String = ""
     private lateinit var titleView: TextView
     private lateinit var dateView: TextView
     private lateinit var photoView: ImageView
@@ -27,6 +31,7 @@ class DetailDiary : Fragment() {
     private lateinit var backButton: ImageButton
     private lateinit var editButton: ImageButton
     private lateinit var deleteButton: ImageButton
+    private lateinit var locationButton: ImageButton
 
     private lateinit var db: FirebaseFirestore
     private var isFavorite: Boolean = false
@@ -58,6 +63,7 @@ class DetailDiary : Fragment() {
         deleteButton = view.findViewById(R.id.deleteButton)
         backButton = view.findViewById(R.id.backButton)
         editButton = view.findViewById(R.id.editButton)
+        locationButton = view.findViewById(R.id.locationButton)
 
         // Load diary details and initialize isFavorite state
         loadDiaryDetails()
@@ -114,6 +120,18 @@ class DetailDiary : Fragment() {
             (activity as MainActivity).replaceFragment(editFragment)
         }
 
+        locationButton.setOnClickListener {
+
+            val mapDetailFragment = MapDetail()
+            val bundle = Bundle().apply {
+                putDouble("latitude", latDouble)
+                putDouble("longitude", lonDouble)
+            }
+            mapDetailFragment.arguments = bundle
+
+            // Navigate to the map fragment
+            (activity as MainActivity).replaceFragment(mapDetailFragment)
+        }
 
         return view
     }
@@ -178,23 +196,15 @@ class DetailDiary : Fragment() {
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    val latitude = document.getString("latitude")
-                    val longitude = document.getString("longitude")
+                    latitude = document.getString("latitude").toString()
+                    longitude = document.getString("longitude").toString()
 
-                    if (latitude != null && longitude != null) {
-                        // Convert latitude and longitude to Double and fetch country name
-                        val latDouble = latitude.toDoubleOrNull()
-                        val lonDouble = longitude.toDoubleOrNull()
+                    // Convert latitude and longitude to Double and fetch country name
+                    latDouble = latitude.toDouble()
+                    lonDouble = longitude.toDouble()
 
-                        if (latDouble != null && lonDouble != null) {
-                            val countryName = getCountryFromCoordinates(latDouble, lonDouble)
-                            locationView.text = countryName ?: "Country not found"
-                        } else {
-                            locationView.text = "Invalid coordinates"
-                        }
-                    } else {
-                        locationView.text = "Location details missing"
-                    }
+                    val countryName = getCityAndCountryFromCoordinates(latDouble, lonDouble)
+                    locationView.text = countryName ?: "Country not found"
                 } else {
                     Log.e("DetailDiary", "Location document does not exist for locationId: $locationId")
                 }
@@ -205,12 +215,14 @@ class DetailDiary : Fragment() {
             }
     }
 
-    private fun getCountryFromCoordinates(latitude: Double, longitude: Double): String? {
+    private fun getCityAndCountryFromCoordinates(latitude: Double, longitude: Double): String? {
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         return try {
             val addresses = geocoder.getFromLocation(latitude, longitude, 1)
             if (addresses!!.isNotEmpty()) {
-                addresses[0].countryName // Extract country name
+                val city = addresses[0].locality
+                val country = addresses[0].countryName
+                if (city != null) "$city, $country" else country // Return city and country, or just country
             } else {
                 null
             }

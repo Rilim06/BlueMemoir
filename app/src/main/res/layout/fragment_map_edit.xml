@@ -1,0 +1,45 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/mapEdit">
+
+    <!-- Google MapView -->
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/google" />
+
+    <!-- Top Background -->
+    <ImageView
+        android:id="@+id/topBg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="@drawable/bgtop"
+        android:translationZ="10dp" />
+
+    <!-- Bottom Background -->
+    <ImageView
+        android:id="@+id/bottomBg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bgbot"
+        android:translationZ="10dp" />
+
+    <!-- Save Button -->
+    <ImageButton
+        android:id="@+id/saveLocation"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/circle_background"
+        android:src="@drawable/save"
+        android:scaleType="centerInside"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp"
+        android:layout_gravity="bottom|end"
+        android:translationZ="11dp"
+        android:contentDescription="@string/nextButton" />
+
+</FrameLayout>

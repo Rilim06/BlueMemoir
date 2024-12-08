@@ -90,7 +90,8 @@
                 android:layout_weight="0.9"
                 android:textSize="20sp"
                 android:clickable="false"
-                android:focusable="false" />
+                android:focusable="false"
+                android:gravity="center"/>
 
         </LinearLayout>
     </LinearLayout>

@@ -70,7 +70,8 @@ android:orientation="vertical">
     android:text="@string/dummy_date"
     android:textColor="@color/loginButton"
     android:layout_weight="0.9"
-    android:textSize="20sp" />
+    android:textSize="20sp"
+    android:gravity="center"/>
 </LinearLayout>
     </LinearLayout>
     </RelativeLayout>

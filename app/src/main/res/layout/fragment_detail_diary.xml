@@ -7,6 +7,7 @@
     android:background="@drawable/detailbg"
     tools:context=".DetailDiary">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -39,6 +40,20 @@
                 android:layout_height="50dp"
                 android:background="@drawable/circle_background"
                 android:src="@drawable/delete"
+                android:scaleType="centerInside"
+                android:contentDescription="@string/nextButton" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+            <ImageButton
+                android:id="@+id/locationButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_background"
+                android:src="@drawable/location"
                 android:scaleType="centerInside"
                 android:contentDescription="@string/nextButton" />
 
@@ -96,7 +111,8 @@
                     android:fontFamily="@font/baloo"
                     android:text="@string/add_title"
                     android:textColor="@color/font7"
-                    android:textSize="40sp" />
+                    android:textSize="40sp"
+                    android:gravity="center"/>
 
                 <TextView
                     android:id="@+id/dateView"
@@ -114,7 +130,8 @@
                     android:fontFamily="@font/baloo"
                     android:text="@string/dummy_location"
                     android:textColor="@color/font7"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:gravity="center"/>
 
                 <View
                     android:layout_width="wrap_content"
