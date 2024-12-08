@@ -23,6 +23,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BlueMemoir"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyALY79PI3jsgnlIyxYsdA54hHdEdRQeb6M" />
+
         <activity
             android:name=".LocationPickerActivity"
             android:exported="false" />
@@ -54,9 +59,6 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-            <meta-data
-                android:name="com.google.android.geo.API_KEY"
-                android:value="@string/map_api" />
         </provider>
     </application>
 

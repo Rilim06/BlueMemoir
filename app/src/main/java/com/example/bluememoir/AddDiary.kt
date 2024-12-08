@@ -67,6 +67,8 @@ class AddDiary : Fragment() {
     private var downloadPath: String? = null
     private var latitude: String? = null
     private var longitude: String? = null
+    private var newLat: String? = null
+    private var newLng: String? = null
     private var country: String? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
@@ -170,33 +172,48 @@ class AddDiary : Fragment() {
         }
 
         editLocationButton.setOnClickListener {
-            val intent = Intent(requireContext(), LocationPickerActivity::class.java)
-            startActivityForResult(intent, LOCATION_PICKER_REQUEST_CODE)
+            val fragment = MapEdit().apply {
+                arguments = Bundle().apply {
+                    putDouble("latitude", latitude?.toDouble() ?: 0.0)
+                    putDouble("longitude", longitude?.toDouble() ?: 0.0)
+                }
+            }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, fragment)
+                .addToBackStack(null)
+                .commit()
         }
+
 
         return view
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LOCATION_PICKER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            if (latitude != null && longitude != null) {
-                locationView.text = "Latitude: $latitude, Longitude: $longitude"
-                // Save to Firebase or any other required action
-            } else {
-                Toast.makeText(requireContext(), "Failed to retrieve location", Toast.LENGTH_SHORT).show()
-            }
+        // Listen for location result from MapEdit
+        parentFragmentManager.setFragmentResultListener("editLocationResult", viewLifecycleOwner) { _, bundle ->
+            val newLatitude = bundle.getDouble("latitude")
+            val newLongitude = bundle.getDouble("longitude")
+
+            // Update state with new location
+            newLat = newLatitude.toString()
+            newLng = newLongitude.toString()
+
+            // Update location display
+            country = getCityAndCountryFromCoordinates(newLatitude, newLongitude)
+            locationView.text = country
+            Log.d("AddDiary", "New location: $country")
+        }
+
+        if (photoUri != null) {
+            photoView.setImageURI(photoUri)
+            swapView()
         }
     }
 
-    companion object {
-        private const val LOCATION_PICKER_REQUEST_CODE = 1001
-    }
-
     private fun fetchLocation() {
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
@@ -205,7 +222,11 @@ class AddDiary : Fragment() {
                     latitude = location.latitude.toString()
                     longitude = location.longitude.toString()
 
-                    country = getCountryFromCoordinates(location.latitude, location.longitude)
+                    if(newLat != null && newLng != null){
+                        latitude = newLat
+                        longitude = newLng
+                    }
+                    country = getCityAndCountryFromCoordinates(latitude!!.toDouble(), longitude!!.toDouble())
                     locationView.text = country
                 } else {
                     Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_SHORT).show()
@@ -222,12 +243,14 @@ class AddDiary : Fragment() {
         }
     }
 
-    private fun getCountryFromCoordinates(latitude: Double, longitude: Double): String? {
+    private fun getCityAndCountryFromCoordinates(latitude: Double, longitude: Double): String? {
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         return try {
             val addresses = geocoder.getFromLocation(latitude, longitude, 1)
             if (addresses!!.isNotEmpty()) {
-                addresses[0].countryName // Get country name
+                val city = addresses[0].locality
+                val country = addresses[0].countryName
+                if (city != null) "$city, $country" else country // Return city and country, or just country
             } else {
                 null
             }
@@ -236,6 +259,7 @@ class AddDiary : Fragment() {
             null
         }
     }
+
 
     private fun showImageSourceDialog() {
         val options = arrayOf("Camera", "Gallery")

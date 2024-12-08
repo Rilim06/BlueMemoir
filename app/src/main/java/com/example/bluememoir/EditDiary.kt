@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -24,6 +25,8 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -47,11 +50,14 @@ class EditDiary : Fragment() {
     private lateinit var photoCard: CardView
     private lateinit var backButton: ImageButton
     private lateinit var dateText: TextView
+    private lateinit var addLocation: TextView
     private lateinit var titleField: EditText
     private lateinit var textField: EditText
+    private lateinit var editLocation: ImageButton
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var photoUri: Uri? = null
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -64,6 +70,13 @@ class EditDiary : Fragment() {
     private var initialText: String? = null
     private var initialPhotoUrl: String? = null
 
+    private var initialLocationId: String? = null
+    private var latitude: String? = null
+    private var longitude: String? = null
+    private var newLat: String? = null
+    private var newLng: String? = null
+    private var country: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -72,6 +85,7 @@ class EditDiary : Fragment() {
         storage = FirebaseStorage.getInstance()
         storageReference = storage.reference
         auth = FirebaseAuth.getInstance()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         detailId = arguments?.getString("detailId") // Retrieve detailId
 
@@ -112,6 +126,8 @@ class EditDiary : Fragment() {
         dateText = view.findViewById(R.id.date)
         titleField = view.findViewById(R.id.addTitle)
         textField = view.findViewById(R.id.addText)
+        addLocation = view.findViewById(R.id.addLocation)
+        editLocation = view.findViewById(R.id.editLocationButton)
 
         val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().time)
         dateText.text = currentDate
@@ -132,7 +148,57 @@ class EditDiary : Fragment() {
             }
         }
 
+        editLocation.setOnClickListener {
+            val fragment = MapEdit().apply {
+                arguments = Bundle().apply {
+                    putDouble("latitude", latitude?.toDouble() ?: 0.0)
+                    putDouble("longitude", longitude?.toDouble() ?: 0.0)
+                }
+            }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Listen for location result from MapEdit
+        parentFragmentManager.setFragmentResultListener("editLocationResult", viewLifecycleOwner) { _, bundle ->
+            val newLatitude = bundle.getDouble("latitude")
+            val newLongitude = bundle.getDouble("longitude")
+
+            // Update state with new location
+            newLat = newLatitude.toString()
+            newLng = newLongitude.toString()
+
+            // Update location display
+            country = getCityAndCountryFromCoordinates(newLatitude, newLongitude)
+            addLocation.text = country
+            Log.d("AddDiary", "New location: $country")
+        }
+
+    }
+
+    private fun getCityAndCountryFromCoordinates(latitude: Double, longitude: Double): String? {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses!!.isNotEmpty()) {
+                val city = addresses[0].locality
+                val country = addresses[0].countryName
+                if (city != null) "$city, $country" else country // Return city and country, or just country
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun loadDiaryData() {
@@ -142,16 +208,68 @@ class EditDiary : Fragment() {
                     initialTitle = document.getString("title")
                     initialText = document.getString("text")
                     initialPhotoUrl = document.getString("photo")
+                    val locationId = document.getString("locationId")
 
                     titleField.setText(initialTitle)
                     textField.setText(initialText)
                     Glide.with(this).load(initialPhotoUrl).into(photoView)
+
+                    fetchLocationId(id)
                     swapView()
                 }
             }.addOnFailureListener { exception ->
                 Toast.makeText(requireContext(), "Failed to load data: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun fetchLocationId(detailId: String) {
+        firestore.collection("Diary")
+            .whereEqualTo("detailId", detailId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents[0]
+                    val locationId = document.getString("locationId")
+                    if (locationId != null) {
+                        // Fetch latitude and longitude based on locationId
+                        fetchLocationDetails(locationId)
+                    } else {
+                        Log.e("DetailDiary", "locationId is null")
+                    }
+                } else {
+                    Log.e("DetailDiary", "No Diary document found for detailId: $detailId")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Error fetching locationId: $exception", Toast.LENGTH_SHORT).show()
+                Log.e("DetailDiary", "Error fetching locationId", exception)
+            }
+    }
+
+    private fun fetchLocationDetails(locationId: String) {
+        firestore.collection("Location").document(locationId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    latitude = document.getString("latitude").toString()
+                    longitude = document.getString("longitude").toString()
+
+                    if(newLat != null && newLng != null){
+                        latitude = newLat
+                        longitude = newLng
+                    }
+
+                    country = getCityAndCountryFromCoordinates(latitude!!.toDouble(), longitude!!.toDouble())
+                    addLocation.text = country ?: "Country not found"
+                } else {
+                    Log.e("DetailDiary", "Location document does not exist for locationId: $locationId")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Error fetching location details: $exception", Toast.LENGTH_SHORT).show()
+                Log.e("DetailDiary", "Error fetching location details", exception)
+            }
     }
 
     private fun showImageSourceDialog() {
@@ -208,6 +326,7 @@ class EditDiary : Fragment() {
                 firestore.collection("DiaryDetail").document(id)
                     .update(updateData)
                     .addOnSuccessListener {
+                        updateLocation(id, latitude, longitude)
                         redirectToHome()
                         Toast.makeText(requireContext(), "Diary updated successfully!", Toast.LENGTH_SHORT).show()
                     }
@@ -217,6 +336,52 @@ class EditDiary : Fragment() {
             }
         }
     }
+
+    private fun updateLocation(detailId: String, lat: String?, lng: String?) {
+        if (lat.isNullOrEmpty() || lng.isNullOrEmpty()) {
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Latitude and Longitude cannot be empty.", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
+        firestore.collection("Diary").whereEqualTo("detailId", detailId).get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val diaryDocument = querySnapshot.documents[0]
+                    val locationId = diaryDocument.getString("locationId")
+
+                    if (!locationId.isNullOrEmpty()) {
+                        val locationData = mapOf("latitude" to latitude, "longitude" to longitude)
+                        firestore.collection("Location").document(locationId).update(locationData)
+                            .addOnSuccessListener {
+                                if (isAdded) {
+                                    Toast.makeText(requireContext(), "Location updated successfully!", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                if(isAdded){
+                                    Toast.makeText(requireContext(), "Failed to update location: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    } else {
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Location ID not found in Diary.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), "Diary with the given detailId not found.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Failed to retrieve Diary: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
 
     private suspend fun uploadImageToFirebase(imageUri: Uri): String = withContext(Dispatchers.IO) {
         val fileName = "images/${System.currentTimeMillis()}.jpg"
