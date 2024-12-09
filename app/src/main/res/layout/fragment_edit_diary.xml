@@ -191,22 +191,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="10dp" />
 
-                <TextView
-                    android:id="@+id/addTag"
-                    android:layout_width="wrap_content"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/tagSlider"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:autofillHints=" "
-                    android:background="@drawable/rounded_input"
-                    android:fontFamily="@font/baloo"
-                    android:minHeight="48dp"
-                    android:paddingStart="16dp"
-                    android:paddingTop="6dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="3dp"
-                    android:text="@string/add_tag"
-                    android:textColor="@color/font3"
-                    android:textColorHint="@color/font3"
-                    android:textSize="24sp" />
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    tools:listitem="@layout/item_tag" />
 
                 <View
                     android:layout_width="wrap_content"

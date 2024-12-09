@@ -4,6 +4,7 @@ data class MyModel(
     val detailId: String = "",
     val title: String = "",
     val date: String = "",
-    val imagePath: String = ""
+    val imagePath: String = "",
+    val tagId: String
 )
 

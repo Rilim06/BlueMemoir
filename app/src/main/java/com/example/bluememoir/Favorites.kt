@@ -24,6 +24,7 @@ class Favorites : Fragment() {
     private lateinit var noFavorite: TextView
     private var dataList = mutableListOf<MyModel>()
     private lateinit var db: FirebaseFirestore
+    private var tagId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +68,7 @@ class Favorites : Fragment() {
                     val favoriteTasks = mutableListOf<Task<DocumentSnapshot>>()
                     for (document in result) {
                         val detailId = document.getString("detailId") ?: continue
+                        tagId = document.getString("tagId") ?: continue
                         favoriteTasks.add(db.collection("DiaryDetail").document(detailId).get())
                     }
 
@@ -80,7 +82,7 @@ class Favorites : Fragment() {
                                 val date = detailDocument.getString("date") ?: ""
                                 val imagePath = detailDocument.getString("photo") ?: ""
 
-                                val model = MyModel(detailDocument.id, title, date, imagePath)
+                                val model = MyModel(detailDocument.id, title, date, imagePath, tagId)
                                 dataList.add(model)
                             }
                         }
