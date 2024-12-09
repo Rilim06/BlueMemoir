@@ -69,7 +69,6 @@
                 android:layout_marginTop="1dp"
                 android:layout_marginEnd="7dp"
                 android:layout_weight="0.5"
-                android:visibility="gone"
                 android:contentDescription="@string/google"/>
 
             <ImageButton
@@ -86,6 +85,7 @@
                 android:layout_marginTop="1dp"
                 android:layout_marginEnd="7dp"
                 android:layout_weight="0.5"
+                android:visibility="gone"
                 android:contentDescription="@string/google"/>
 
             <ImageButton
@@ -105,19 +105,15 @@
 
         </LinearLayout>
 
-
-        <Button
-            android:id="@+id/tagButton"
-            android:layout_width="100dp"
+        <Spinner
+            android:id="@+id/tagSpinner"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/tag_button"
+            android:background="@drawable/rounded_search_button"
             android:fontFamily="@font/baloo"
             android:textColor="@color/loginButton"
             android:gravity="center"
-            android:backgroundTint="@null"
-            android:text="@string/tag"
-            android:textAllCaps="false"
-            android:contentDescription="@string/google"/>
+            android:layout_marginBottom="16dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/homeView"

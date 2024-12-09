@@ -13,6 +13,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ImageButton
@@ -24,6 +26,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -76,6 +80,12 @@ class EditDiary : Fragment() {
     private var newLat: String? = null
     private var newLng: String? = null
     private var country: String? = null
+
+    private lateinit var tagRecyclerView: RecyclerView
+    private lateinit var tagAdapter: TagAdapter
+    private val tags = mutableListOf<Tag>()
+    private var selectedTag: Tag? = null
+    private lateinit var initialTag: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,6 +192,35 @@ class EditDiary : Fragment() {
             Log.d("AddDiary", "New location: $country")
         }
 
+        tagRecyclerView = view.findViewById(R.id.tagSlider)
+        tagRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+        tagAdapter = TagAdapter(tags) { tag ->
+            selectedTag = tag
+        }
+        tagRecyclerView.adapter = tagAdapter
+
+        fetchTag()
+    }
+
+    private fun fetchTag() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("Tag")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                tags.clear()
+                for (doc in querySnapshot.documents) {
+                    val id = doc.id
+                    val name = doc.getString("name")
+                    if (name != null) {
+                        tags.add(Tag(id, name))
+                    }
+                }
+                tagAdapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                Log.e("AddDiary", "Error fetching tags", e)
+            }
     }
 
     private fun getCityAndCountryFromCoordinates(latitude: Double, longitude: Double): String? {
@@ -203,23 +242,66 @@ class EditDiary : Fragment() {
 
     private fun loadDiaryData() {
         detailId?.let { id ->
-            firestore.collection("DiaryDetail").document(id).get().addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    initialTitle = document.getString("title")
-                    initialText = document.getString("text")
-                    initialPhotoUrl = document.getString("photo")
-                    val locationId = document.getString("locationId")
+            firestore.collection("Diary").whereEqualTo("detailId", id).get()
+                .addOnSuccessListener { diarySnapshot ->
+                    if (!diarySnapshot.isEmpty) {
+                        val diaryDocument = diarySnapshot.documents[0]
+                        val tagId = diaryDocument.getString("tagId") // Get tagId
 
-                    titleField.setText(initialTitle)
-                    textField.setText(initialText)
-                    Glide.with(this).load(initialPhotoUrl).into(photoView)
+                        firestore.collection("DiaryDetail").document(id).get()
+                            .addOnSuccessListener { document ->
+                                if (document != null && document.exists()) {
+                                    initialTitle = document.getString("title")
+                                    initialText = document.getString("text")
+                                    initialPhotoUrl = document.getString("photo")
+                                    val locationId = document.getString("locationId")
 
-                    fetchLocationId(id)
-                    swapView()
+                                    titleField.setText(initialTitle)
+                                    textField.setText(initialText)
+                                    Glide.with(this).load(initialPhotoUrl).into(photoView)
+
+                                    fetchLocationId(id)
+                                    fetchSelectedTag(tagId)
+                                    swapView()
+                                }
+                            }.addOnFailureListener { exception ->
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to load diary details: ${exception.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    } else {
+                        Toast.makeText(requireContext(), "Diary not found", Toast.LENGTH_SHORT).show()
+                    }
+                }.addOnFailureListener { exception ->
+                    Toast.makeText(requireContext(), "Failed to fetch diary: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
-            }.addOnFailureListener { exception ->
-                Toast.makeText(requireContext(), "Failed to load data: ${exception.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun fetchSelectedTag(selectedTagId: String?) {
+        firestore.collection("Tag").get().addOnSuccessListener { querySnapshot ->
+            val tagList = mutableListOf<Tag>()
+            for (document in querySnapshot.documents) {
+                val tag = Tag(
+                    id = document.id,
+                    name = document.getString("name") ?: ""
+                )
+                tagList.add(tag)
             }
+
+            tags.clear()
+            tags.addAll(tagList)
+            tagAdapter.notifyDataSetChanged()
+
+            // Set the initially selected tag
+            selectedTagId?.let { id ->
+                initialTag = id
+                tagAdapter.setInitialSelectedTag(id)
+            }
+        }.addOnFailureListener { exception ->
+            Toast.makeText(requireContext(), "Failed to fetch tags: ${exception.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -311,6 +393,7 @@ class EditDiary : Fragment() {
     private fun updateDiary() {
         val title = if (titleField.text.toString().isNotEmpty()) titleField.text.toString() else initialTitle
         val text = if (textField.text.toString().isNotEmpty()) textField.text.toString() else initialText
+        val updatedTag = selectedTag?.id ?: initialTag
         val updateData = mutableMapOf<String, Any?>("title" to title, "text" to text)
 
         CoroutineScope(Dispatchers.Main).launch {
@@ -326,6 +409,7 @@ class EditDiary : Fragment() {
                 firestore.collection("DiaryDetail").document(id)
                     .update(updateData)
                     .addOnSuccessListener {
+                        updateTagDiary(id, updatedTag)
                         updateLocation(id, latitude, longitude)
                         redirectToHome()
                         Toast.makeText(requireContext(), "Diary updated successfully!", Toast.LENGTH_SHORT).show()
@@ -335,6 +419,30 @@ class EditDiary : Fragment() {
                     }
             }
         }
+    }
+
+    private fun updateTagDiary(detailId: String, tagId: String) {
+        // Update the tagId in the Diary collection
+        firestore.collection("Diary")
+            .whereEqualTo("detailId", detailId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val diaryDocument = querySnapshot.documents[0]
+                val diaryId = diaryDocument.id
+
+                firestore.collection("Diary").document(diaryId)
+                    .update("tagId", tagId)
+                    .addOnSuccessListener {
+                        Log.d("Update", "tagId updated in Diary collection")
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to update tagId: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to find Diary document: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun updateLocation(detailId: String, lat: String?, lng: String?) {

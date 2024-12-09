@@ -17,6 +17,15 @@ import android.net.Uri
 import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class Home : Fragment() {
 
@@ -24,6 +33,9 @@ class Home : Fragment() {
     private lateinit var adapter: MyAdapter
     private lateinit var noDiary: TextView
     private lateinit var searchInput: EditText
+    private lateinit var tagSpinner: Spinner
+    private lateinit var tags: MutableList<String>
+    private var selectedTag: String? = null
     private var dataList = mutableListOf<MyModel>()
     private var filteredList = mutableListOf<MyModel>()
     private lateinit var auth: FirebaseAuth
@@ -97,6 +109,76 @@ class Home : Fragment() {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        tagSpinner = view.findViewById(R.id.tagSpinner)
+
+        tags = mutableListOf("All")
+
+        fetchTags { fetchedTags ->
+            tags.addAll(fetchedTags)
+            setupSpinner()
+        }
+    }
+
+    private fun fetchTags(onTagsFetched: (List<String>) -> Unit) {
+        FirebaseFirestore.getInstance().collection("Tag")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val fetchedTags = querySnapshot.documents.mapNotNull { it.getString("name") }
+                onTagsFetched(fetchedTags)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("HomeFragment", "Error fetching tags", exception)
+                Toast.makeText(requireContext(), "Failed to fetch tags", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun setupSpinner() {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            R.layout.custom_spinner_item,
+            tags
+        )
+        adapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
+        tagSpinner.adapter = adapter
+
+        tagSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedTag = tags[position]
+                if(dataList.isNotEmpty()){
+                    filterDiariesByTag(selectedTag)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedTag = tags[0]
+            }
+        }
+    }
+
+    private fun filterDiariesByTag(tag: String?) {
+        lifecycleScope.launch {
+            Log.d("HomeFragment", "Filtering diaries by tag: $tag")
+
+            retrieveData()
+
+            filteredList = withContext(Dispatchers.Default) {
+                mutableListOf<MyModel>().apply {
+                    addAll(
+                        if (tag == "All" || tag.isNullOrEmpty()) {
+                            dataList
+                        } else {
+                            dataList.filter { it.tagId == tag }
+                        }
+                    )
+                }
+            }
+            adapter.updateData(filteredList)
+        }
+    }
+
     private fun retrieveData(){
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -114,6 +196,11 @@ class Home : Fragment() {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     val detailId = document.getString("detailId") ?: continue
+                    var tagId = document.getString("tagId") ?: continue
+
+                    db.collection("Tag").document(tagId).get().addOnSuccessListener { tagDocument ->
+                        tagId = tagDocument.getString("name") ?: ""
+                    }
 
                     // Fetch details from DiaryDetail collection
                     db.collection("DiaryDetail").document(detailId)
@@ -126,7 +213,7 @@ class Home : Fragment() {
                             Log.d("DetailDiary", "Retrieved detailId: $detailId")
 
                             // Add to dataList
-                            val model = MyModel(id, title, date, imagePath)
+                            val model = MyModel(id, title, date, imagePath, tagId)
                             tempDataList.add(model)
 
                             documentsProcessed++
@@ -137,6 +224,7 @@ class Home : Fragment() {
                                 // Clear the original data list and add sorted data
                                 dataList.clear()
                                 dataList.addAll(tempDataList)
+                                filteredList.addAll(tempDataList)
 
                                 // Notify adapter of data change once
                                 adapter.notifyDataSetChanged()
@@ -172,15 +260,31 @@ class Home : Fragment() {
 
 
     private fun recentData() {
-        // Sort dataList by date in descending order (recent first)
-        dataList.sortByDescending { it.date }
-        adapter.notifyDataSetChanged()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+        filteredList.sortByDescending {
+            try {
+                dateFormat.parse(it.date)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        adapter.updateData(filteredList)
     }
 
     private fun oldestData() {
-        // Sort dataList by date in ascending order (oldest first)
-        dataList.sortBy { it.date }
-        adapter.notifyDataSetChanged()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+        filteredList.sortBy {
+            try {
+                dateFormat.parse(it.date)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        adapter.updateData(filteredList)
     }
 
     private fun navigateToDetailDiary(detailId: String) {

@@ -26,6 +26,7 @@ class DetailDiary : Fragment() {
     private lateinit var dateView: TextView
     private lateinit var photoView: ImageView
     private lateinit var locationView: TextView
+    private lateinit var tagView: TextView
     private lateinit var viewText: TextView
     private lateinit var favoriteButton: ImageButton
     private lateinit var backButton: ImageButton
@@ -64,6 +65,7 @@ class DetailDiary : Fragment() {
         backButton = view.findViewById(R.id.backButton)
         editButton = view.findViewById(R.id.editButton)
         locationButton = view.findViewById(R.id.locationButton)
+        tagView = view.findViewById(R.id.tagView)
 
         // Load diary details and initialize isFavorite state
         loadDiaryDetails()
@@ -138,31 +140,52 @@ class DetailDiary : Fragment() {
 
     private fun loadDiaryDetails() {
         detailId?.let { id ->
-            // Retrieve data from Firestore
-            db.collection("DiaryDetail").document(id)
+            db.collection("Diary")
+                .whereEqualTo("detailId", id)
                 .get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        // Retrieve details from document
-                        titleView.text = document.getString("title")
-                        dateView.text = document.getString("date")
-                        viewText.text = document.getString("text")
-                        val imagePath = document.getString("photo")
+                .addOnSuccessListener { diarySnapshot ->
+                    if (!diarySnapshot.isEmpty) {
+                        val diaryDocument = diarySnapshot.documents[0]
+                        val tagId = diaryDocument.getString("tagId")
 
-                        // Load image with Glide
-                        Glide.with(this)
-                            .load(imagePath)
-                            .into(photoView)
+                        db.collection("DiaryDetail").document(id)
+                            .get()
+                            .addOnSuccessListener { document ->
+                                if (document != null && document.exists()) {
 
-                        // Initialize favorite state
-                        isFavorite = document.getBoolean("isFavorite") ?: false
-                        favoriteButton.isSelected = isFavorite
+                                    titleView.text = document.getString("title")
+                                    dateView.text = document.getString("date")
+                                    viewText.text = document.getString("text")
+                                    val imagePath = document.getString("photo")
+
+                                    if (tagId != null) {
+                                        db.collection("Tag").document(tagId)
+                                            .get()
+                                            .addOnSuccessListener { tagDocument ->
+                                                if (tagDocument != null && tagDocument.exists()) {
+                                                    val tagName = tagDocument.getString("name")
+                                                    tagView.text = tagName
+                                                }
+                                            }
+                                    }
+                                    Glide.with(this)
+                                        .load(imagePath)
+                                        .into(photoView)
+
+                                    isFavorite = document.getBoolean("isFavorite") ?: false
+                                    favoriteButton.isSelected = isFavorite
+                                }
+                                fetchLocationId(id)
+                            }
+                            .addOnFailureListener { exception ->
+                                Toast.makeText(requireContext(), "Error loading diary details: $exception", Toast.LENGTH_SHORT).show()
+                                Log.e("DetailDiary", "Error loading diary details", exception)
+                            }
                     }
-                    fetchLocationId(id)
                 }
                 .addOnFailureListener { exception ->
                     Toast.makeText(requireContext(), "Error loading diary details: $exception", Toast.LENGTH_SHORT).show()
-                    Log.e("DetailDiary", "Error loading diary details", exception)
+                    Log.e("DetailDiary", "Error loading diary data", exception)
                 }
         } ?: Log.e("DetailDiary", "detailId is null")
     }

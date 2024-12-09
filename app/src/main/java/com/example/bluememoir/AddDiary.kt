@@ -44,6 +44,8 @@ import java.util.Calendar
 import java.util.Locale
 import com.google.android.gms.location.LocationServices
 import android.location.Geocoder
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class AddDiary : Fragment() {
 
@@ -72,6 +74,10 @@ class AddDiary : Fragment() {
     private var country: String? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var tagRecyclerView: RecyclerView
+    private lateinit var tagAdapter: TagAdapter
+    private val tags = mutableListOf<Tag>()
+    private var selectedTag: Tag? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -210,6 +216,37 @@ class AddDiary : Fragment() {
             photoView.setImageURI(photoUri)
             swapView()
         }
+
+        tagRecyclerView = view.findViewById(R.id.tagSlider)
+        tagRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+        tagAdapter = TagAdapter(tags) { tag ->
+            selectedTag = tag
+        }
+        tagRecyclerView.adapter = tagAdapter
+
+        fetchTag()
+
+    }
+
+    private fun fetchTag() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("Tag")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                tags.clear()
+                for (doc in querySnapshot.documents) {
+                    val id = doc.id
+                    val name = doc.getString("name")
+                    if (name != null) {
+                        tags.add(Tag(id, name))
+                    }
+                }
+                tagAdapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                Log.e("AddDiary", "Error fetching tags", e)
+            }
     }
 
     private fun fetchLocation() {
@@ -308,7 +345,7 @@ class AddDiary : Fragment() {
 
         val latitude = latitude
         val longitude = longitude
-        val tagId = "kJ3nw0aB27e4fgLnWlt3" // Travel
+        val tagId = selectedTag?.id
         val currentDate = Calendar.getInstance().time
         val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(currentDate)
         val title = view?.findViewById<EditText>(R.id.addTitle)
@@ -399,3 +436,8 @@ class AddDiary : Fragment() {
         activity?.finish()
     }
 }
+
+data class Tag(
+    val id: String,
+    val name: String
+)

@@ -97,6 +97,7 @@ class AllDiary : Fragment() {
                         noDiary.visibility = View.GONE
                         view?.findViewById<LinearLayout>(R.id.belowSearchLayout)?.visibility = View.VISIBLE
                         val detailId = document.getString("detailId") ?: continue
+                        val tagId = document.getString("tagId") ?: continue
 
                         db.collection("DiaryDetail").document(detailId)
                             .get()
@@ -105,7 +106,7 @@ class AllDiary : Fragment() {
                                 val date = detailDocument.getString("date") ?: ""
                                 val imagePath = detailDocument.getString("photo") ?: ""
                                 val id = detailDocument.id
-                                tempDataList.add(MyModel(id, title, date, imagePath))
+                                tempDataList.add(MyModel(id, title, date, imagePath, tagId))
 
                                 documentsProcessed++
 

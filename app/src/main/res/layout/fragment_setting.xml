@@ -212,29 +212,6 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="6dp"
                 android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/label_notification"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.4"
-                    android:text="@string/notif"
-                    android:textSize="18sp"
-                    android:textColor="@color/font3"
-                    android:fontFamily="@font/baloo" />
-
-                <Button
-                    android:id="@+id/button_notification"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.6"
-                    android:text="@string/allow"
-                    android:background="@drawable/rounded_input"
-                    android:textColor="@color/font7"
-                    android:textSize="18sp"
-                    android:padding="8dp"
-                    android:textAllCaps="false"
-                    android:fontFamily="@font/baloo" />
             </LinearLayout>
 
         </LinearLayout>
