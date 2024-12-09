@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
 import android.location.Geocoder
+import com.google.firebase.storage.FirebaseStorage
 import java.util.Locale
 
 class DetailDiary : Fragment() {
@@ -81,37 +82,60 @@ class DetailDiary : Fragment() {
 
         deleteButton.setOnClickListener {
             detailId?.let { id ->
-                // First, delete the diary entry from DiaryDetail
+                // Fetch the image path from Firestore before deleting the entry
                 db.collection("DiaryDetail").document(id)
-                    .delete()
-                    .addOnSuccessListener {
-                        db.collection("Diary")
-                            .whereEqualTo("detailId", id) // Fetch the Diary document where detailId matches
-                            .get()
-                            .addOnSuccessListener { diaryResult ->
-                                if (!diaryResult.isEmpty) {
-                                    for (diaryDoc in diaryResult) {
-                                        diaryDoc.reference.delete() // Delete the Diary document
-                                        Log.d("DetailDiary", "Deleted Diary entry with id: ${diaryDoc.id}")
-                                    }
-                                    Toast.makeText(requireContext(), "Diary entry deleted", Toast.LENGTH_SHORT).show()
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document != null && document.exists()) {
+                            val imagePath = document.getString("photo")!!.substringAfter("/o/").substringBefore("?").replace("%2F", "/")
+
+                            // Delete the image from Firebase Storage
+                            val storageRef = FirebaseStorage.getInstance().getReference(imagePath)
+                            storageRef.delete()
+                                .addOnSuccessListener {
+                                    Log.d("DetailDiary", "Image deleted successfully from Firebase Storage")
                                 }
-                                // Optionally, navigate back to the previous fragment or home
-                                (activity as MainActivity).replaceFragment(Home())
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(requireContext(), "Failed to delete diary entry from Diary: $e", Toast.LENGTH_SHORT).show()
-                                Log.e("DetailDiary", "Error deleting diary entry from Diary", e)
-                            }
+                                .addOnFailureListener { e ->
+                                    Log.e("DetailDiary", "Failed to delete image from Firebase Storage", e)
+                                }
+
+                            // Proceed to delete the diary entry
+                            db.collection("DiaryDetail").document(id)
+                                .delete()
+                                .addOnSuccessListener {
+                                    db.collection("Diary")
+                                        .whereEqualTo("detailId", id)
+                                        .get()
+                                        .addOnSuccessListener { diaryResult ->
+                                            if (!diaryResult.isEmpty) {
+                                                for (diaryDoc in diaryResult) {
+                                                    diaryDoc.reference.delete()
+                                                    Log.d("DetailDiary", "Deleted Diary entry with id: ${diaryDoc.id}")
+                                                }
+                                            }
+                                            Toast.makeText(requireContext(), "Diary entry deleted", Toast.LENGTH_SHORT).show()
+                                            // Navigate back to Home
+                                            (activity as MainActivity).replaceFragment(Home())
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Toast.makeText(requireContext(), "Failed to delete diary entry from Diary: $e", Toast.LENGTH_SHORT).show()
+                                            Log.e("DetailDiary", "Error deleting diary entry from Diary", e)
+                                        }
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(requireContext(), "Failed to delete diary entry from DiaryDetail: $e", Toast.LENGTH_SHORT).show()
+                                    Log.e("DetailDiary", "Error deleting diary entry from DiaryDetail", e)
+                                }
+                        } else {
+                            Log.e("DetailDiary", "Document does not exist for detailId: $id")
+                        }
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), "Failed to delete diary entry from DiaryDetail: $e", Toast.LENGTH_SHORT).show()
-                        Log.e("DetailDiary", "Error deleting diary entry from DiaryDetail", e)
+                        Toast.makeText(requireContext(), "Failed to fetch diary details for deletion: $e", Toast.LENGTH_SHORT).show()
+                        Log.e("DetailDiary", "Error fetching diary details for deletion", e)
                     }
             } ?: Log.e("DetailDiary", "detailId is null when trying to delete diary entry")
         }
-
-
 
         editButton.setOnClickListener {
             val editFragment = EditDiary()
