@@ -27,6 +27,8 @@ class Profile : Fragment() {
     private lateinit var accountView: TextView
     private lateinit var photoView: ImageView
     private lateinit var profileView: ImageView
+    private lateinit var emailView: TextView
+    private lateinit var countView: TextView
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     private lateinit var storageReference: StorageReference
@@ -53,6 +55,8 @@ class Profile : Fragment() {
         accountView = view.findViewById(R.id.profile_email)
         profileView = view.findViewById(R.id.profileView)
         photoView = view.findViewById(R.id.photoView)
+        emailView = view.findViewById(R.id.profile_email)
+        countView = view.findViewById(R.id.diaries_written)
 
         val gso: GoogleSignInOptions? =
             @Suppress("DEPRECATION")
@@ -82,9 +86,11 @@ class Profile : Fragment() {
                 if (!querySnapshot.isEmpty) {
                     val document = querySnapshot.documents[0]
                     val name = document.getString("name") ?: "Unknown"
+                    val email = auth.currentUser?.email ?: "Email not available"
                     previousPhotoPath = document.getString("photo")
 
                     nameView.text = name
+                    emailView.text = email
 
                     if(previousPhotoPath != null){
                         swapView()
@@ -99,6 +105,16 @@ class Profile : Fragment() {
             .addOnFailureListener { exception ->
                 // Handle error
                 Log.e("ProfileFragment", "Error fetching profile data", exception)
+            }
+
+        val diariesRef = firestore.collection("Diary")
+        diariesRef.whereEqualTo("userId", currentUserId).get()
+            .addOnSuccessListener { querySnapshot ->
+                val count = querySnapshot.size()
+                countView.text = "Diaries written: $count"
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ProfileFragment", "Error fetching diaries count", exception)
             }
 
         return view
